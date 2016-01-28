@@ -9,6 +9,8 @@ namespace StockSimulator
 {
     class Program
     {
+//        Exchange NYSE;
+
         static void Main(string[] args)
         {
             Program program = new Program();
@@ -40,42 +42,13 @@ namespace StockSimulator
             Exchange NYSE = new Exchange();
             //NYSE.Add("JPM");
 
-            string symbol = "";
+            string symbol = "JPM";
 
             String path = @"C:\Users\Phil\Downloads\JPM_20150101_20160127.txt";
 
             DateTime startTime = DateTime.Now;
-            DateTime intTime = new DateTime();
-
-            using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (BufferedStream bs = new BufferedStream(fs))
-            using (StreamReader sr = new StreamReader(bs))
-            {
-                string line;
-                
-                if((line = sr.ReadLine()) != null) //read first line and test if not-null
-                {
-                    if(line[0] == '<') //test if header row is present
-                    {
-                        if ((line = sr.ReadLine()) == null)
-                        {
-                            return; //if header row is present and next row is null, return as no data to process
-                        }
-                    }
-
-                    //get stock symbol and ensure ticker is ready
-                    symbol = line.Split(',')[0];
-                    NYSE.Add(symbol);
-
-                    intTime = DateTime.Now;
-
-                    do
-                    {
-                        NYSE[symbol].AddDay(line);
-                    } while ((line = sr.ReadLine()) != null);
-                }
-            }
-
+            readFile(path, NYSE);
+            //readFile(path, NYSE);
             DateTime stopTime = DateTime.Now;
 
             StockRow start = NYSE[symbol][Ticker.toDate("20150102")];
@@ -89,18 +62,42 @@ namespace StockSimulator
             Console.Out.WriteLine("Symbol: " + symbol);
             Console.Out.WriteLine("High: $" + high);
             Console.Out.WriteLine("Low: $" + low);
-            Console.Out.WriteLine("Change: " + Math.Round(change,2) + "%");
-
-
-            TimeSpan time = stopTime - startTime;
-            TimeSpan time1 = intTime - startTime;
-            TimeSpan time2 = stopTime - intTime;
+            Console.Out.WriteLine("Change: " + Math.Round(change, 2) + "%");
 
             Console.Out.WriteLine("");
+            TimeSpan time = stopTime - startTime;
             Console.Out.WriteLine("Time taken: " + time.TotalMilliseconds + "ms");
-            Console.Out.WriteLine("Time to add stock: " + time1.TotalMilliseconds + "ms");
-            Console.Out.WriteLine("Time to add data: " + time2.TotalMilliseconds + "ms");
-            Console.Out.WriteLine("Time per line: " + (time2.TotalMilliseconds/280) + "ms");
+        }
+
+        public void readFile(string path, Exchange ex)
+        {
+            string symbol = "";
+            using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (BufferedStream bs = new BufferedStream(fs))
+            using (StreamReader sr = new StreamReader(bs))
+            {
+                string line;
+
+                if ((line = sr.ReadLine()) != null) //read first line and test if not-null
+                {
+                    if (line[0] == '<') //test if header row is present
+                    {
+                        if ((line = sr.ReadLine()) == null)
+                        {
+                            return; //if header row is present and next row is null, return as no data to process
+                        }
+                    }
+
+                    //get stock symbol and ensure ticker is ready
+                    symbol = line.Split(',')[0];
+                    ex.Add(symbol);
+
+                    do
+                    {
+                        ex[symbol].AddDay(line);
+                    } while ((line = sr.ReadLine()) != null);
+                }
+            }
         }
     }
 }
@@ -127,7 +124,15 @@ public class Ticker : SortedDictionary<DateTime, StockRow>
         string[] split = data.Split(',');
         StockRow row = rowMaker(split);
 
-        this.Add(row.date, row);
+        try
+        {
+            this.Add(row.date, row);
+        }
+        catch (ArgumentException e)
+        {
+            this.Remove(row.date);
+            this.Add(row.date, row);
+        }
     }
 
     private static StockRow rowMaker(string[] data)
