@@ -84,9 +84,12 @@ namespace StockSimulator
             decimal high = start.high > end.high ? start.high : end.high;
             decimal low = start.low < end.low ? start.low : end.low;
 
+            decimal change = ((start.open - end.close) / end.close);
+
             Console.Out.WriteLine("Symbol: " + symbol);
             Console.Out.WriteLine("High: $" + high);
             Console.Out.WriteLine("Low: $" + low);
+            Console.Out.WriteLine("Change: " + Math.Round(change,2) + "%");
 
 
             TimeSpan time = stopTime - startTime;
