@@ -8,8 +8,11 @@ using System.Threading.Tasks;
 namespace StockSimulator {
     public class GameLogic
     {
+        public Exchange NYSE;
+
 	    public GameLogic()
 	    {
+
 	    }
 
         /// <summary>
