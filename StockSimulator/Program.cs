@@ -25,11 +25,14 @@ namespace StockSimulator
             gl = new GameLogic();
 
             //testExchange();
-            testGrouping();
+            //testGrouping();
+
+            //string response = 
+            gl.parseJSON("JPM");
+            //Console.Write(response);
+
             Console.In.Read();
         }
-
-
 
         void testTicker()
         {
