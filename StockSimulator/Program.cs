@@ -5,11 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Diagnostics;
+
 namespace StockSimulator
 {
     class ConsoleMenu
     {
-        //        Exchange NYSE;
+        //Exchange NYSE;
         GameLogic gl;
 
         static void Main(string[] args)
@@ -20,9 +22,14 @@ namespace StockSimulator
 
         void menu()
         {
-            testExchange();
+            gl = new GameLogic();
+
+            //testExchange();
+            testGrouping();
             Console.In.Read();
         }
+
+
 
         void testTicker()
         {
@@ -40,20 +47,20 @@ namespace StockSimulator
 
         void testExchange()
         {
-            Exchange NYSE = new Exchange();
+            gl.NYSE = new Exchange();
             //NYSE.Add("JPM");
 
             string symbol = "JPM";
 
-            String path = @"C:\Users\Phil\Downloads\JPM_20150101_20160127.txt";
+            String path = @"C:\downloads\JPM_20150101_20160128.txt";
 
             DateTime startTime = DateTime.Now;
-            gl.readFile(path, NYSE);
+            gl.readFile(path, gl.NYSE);
             //readFile(path, NYSE);
             DateTime stopTime = DateTime.Now;
 
-            StockRow start = NYSE[symbol][Utilities.toDate("20150102")];
-            StockRow end = NYSE[symbol][Utilities.toDate("20150520")];
+            StockRow start = gl.NYSE[symbol][Utilities.toDate("20160101")];
+            StockRow end = gl.NYSE[symbol][Utilities.toDate("20160128")];
 
             decimal high = start.high > end.high ? start.high : end.high;
             decimal low = start.low < end.low ? start.low : end.low;
@@ -68,6 +75,20 @@ namespace StockSimulator
             Console.Out.WriteLine("");
             TimeSpan time = stopTime - startTime;
             Console.Out.WriteLine("Time taken: " + time.TotalMilliseconds + "ms");
+        }
+
+        void testGrouping()
+        {
+            testExchange();
+
+            //next line from StackOverflow - used to extract data from the SortedDictionary ordered by propery of value, not by key
+            //http://stackoverflow.com/a/1332
+            var sortedDic = from entry in gl.NYSE["JPM"] orderby entry.Value.high descending select entry;
+
+            foreach (var line in sortedDic.ToList())
+            {
+                Console.WriteLine(line.Value.date + " - $" + line.Value.high);
+            }
         }
     }
 }
