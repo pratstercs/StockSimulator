@@ -73,6 +73,38 @@ namespace StockSimulator {
                 this.Add(symbol, new Ticker());
             }
         }
+
+        /// <summary>
+        /// Returns a list of the KVPairs contained in the specified Ticker, ordered by the specified property (high to low)
+        /// </summary>
+        /// <param name="symbol">The symbol's data to extract</param>
+        /// <param name="property">The property to sort on (open,high,low,close,volume)</param>
+        /// <returns>The sorted list of KVPs</returns>
+        public List<KeyValuePair<DateTime, StockRow>> getSorted(string symbol, string property)
+        {
+            IOrderedEnumerable<KeyValuePair<DateTime, StockRow>> sortedDic;
+
+            switch(symbol) {
+                case "high" :
+                    sortedDic = from entry in this[symbol] orderby entry.Value.high descending select entry;
+                    break;
+                case "low" :
+                    sortedDic = from entry in this[symbol] orderby entry.Value.low descending select entry;
+                    break;
+                case "close" :
+                    sortedDic = from entry in this[symbol] orderby entry.Value.high descending select entry;
+                    break;
+                case "volume" :
+                    sortedDic = from entry in this[symbol] orderby entry.Value.high descending select entry;
+                    break;
+                case "open" :
+                default:
+                    sortedDic = from entry in this[symbol] orderby entry.Value.open descending select entry;
+                    break;
+            }
+
+            return new List<KeyValuePair<DateTime, StockRow>>(sortedDic);
+        }
     }
 
     /// <summary>
@@ -97,6 +129,8 @@ namespace StockSimulator {
             }
             catch (ArgumentException e)
             {
+                e.ToString();
+
                 this.Remove(row.date); //catching duplicate data -will replace existing data with new data
                 this.Add(row.date, row); //large performance hit ~81x expected performance
             }
