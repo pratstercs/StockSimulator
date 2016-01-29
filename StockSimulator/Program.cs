@@ -55,7 +55,15 @@ namespace StockSimulator
             String path = @"C:\downloads\JPM_20150101_20160128.txt";
 
             DateTime startTime = DateTime.Now;
-            gl.readFile(path, gl.NYSE);
+            try
+            {
+                gl.readFile(path, gl.NYSE);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
             //readFile(path, NYSE);
             DateTime stopTime = DateTime.Now;
 
