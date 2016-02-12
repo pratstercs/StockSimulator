@@ -28,8 +28,13 @@ namespace StockSimulator
             //testGrouping();
 
             //string response = 
-            gl.parseJSON("JPM");
+            //gl.parseJSON("JPM");
             //Console.Write(response);
+
+            string data = gl.getData("JPM");
+            gl.arrayify(data);
+
+            Console.Write(data);
 
             Console.In.Read();
         }

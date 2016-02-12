@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace StockSimulator {
     public class GameLogic
@@ -59,32 +60,37 @@ namespace StockSimulator {
             }
         }
 
-        public void parseJSON(string symbol)
+        public string getData(string symbol)
         {
-            string rawJson = getJSON(symbol); //get json as string
+            string data = "";
+            string url = "http://philippratt.co.uk:5000/" + symbol;
 
-            JObject json = JObject.Parse( //parse whole string
-                JObject.Parse(rawJson)["dataset"].ToString() //parse inner dataset as actual JObject
-            );
-
-            string name = json["name"].ToString();
-            name = name.Split('(').First();
-            name = name.Substring(0, name.Length - 1);
-
-            //splitting json data string into actual useful variables
-            string dataString = json["data"].ToString();
-            char[] delim = { '[', ']' };
-            string[] data = dataString.Split(delim);
+            try
+            {
+                data = new WebClient().DownloadString(url);
+                return data;
+            }
+            catch (WebException e)
+            {
+                Console.Write(e.ToString());
+                return null;
+            }
         }
 
-        public string getJSON(string symbol)
+        public string[,] arrayify(string response)
         {
-            string url = "https://www.quandl.com/api/v3/datasets/WIKI/" + symbol + ".json?start_date=2016-01-01&end_date=2016-01-28?api_key=" + API_KEY;
+            Regex regex = new Regex(@"\[([^\[].*?[^\]])\]"); //split response into the subarrays
+            MatchCollection matches = regex.Matches(response); //get all matches
+            string[,] array = new string[matches.Count, 6]; //create return array with the right sizes
+            foreach(Match m in matches)
+            {
+                string match = m.ToString();
+                match = match.Substring(1, match.Length - 2);
+                string[] splitted = match.Split(',');
+                //parse datetime and decimals
+            }
 
-            //return webInterface.getPage(url);
-
-            string data = new WebClient().DownloadString(url);
-            return data;
+            return array;
         }
     }
 
