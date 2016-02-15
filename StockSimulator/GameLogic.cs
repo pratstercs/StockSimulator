@@ -9,11 +9,43 @@ namespace StockSimulator
 {
     public class GameLogic
     {
-        public Exchange NYSE;
+        public Exchange ex;
+        public List<Stock> wallet = new List<Stock>();
+        decimal cash;
 
         public GameLogic()
         {
+            ex = new Exchange();
+        }
 
+        public GameLogic(Exchange e)
+        {
+            ex = e;
+        }
+
+        public bool buyStock(DateTime date, string symbol, int amount)
+        {
+            StockRow sr = ex[symbol][date];
+
+            decimal totalCost = sr.close * amount; //close? not open?
+            if(cash < totalCost || amount > sr.volume) //totalCost is more than available cash or amount wanting to purchase is greater than volume available
+            {
+                return false;
+            }
+            else
+            {
+                wallet.Add(
+                    new Stock(
+                        date,
+                        sr.close,
+                        amount
+                        )
+                    );
+                //ex[symbol][date].volume -= amount; //can't modify directly for some reason. Will leave as edge case - unlikely someone will want to buy more than is available of a company
+                cash -= totalCost;
+            }
+
+            return true;
         }
     }
 
@@ -347,6 +379,23 @@ namespace StockSimulator
             high = hi;
             low = lo;
             volume = vol;
+        }
+    }
+
+    /// <summary>
+    /// A struct to store purchased stocks
+    /// </summary>
+    public struct Stock
+    {
+        public DateTime purchaseDate { get; }
+        public decimal purchasePrice { get; }
+        public int amount { get; }
+
+        public Stock(DateTime date, decimal price, int volume)
+        {
+            purchaseDate = date;
+            purchasePrice = price;
+            amount = volume;
         }
     }
 }
