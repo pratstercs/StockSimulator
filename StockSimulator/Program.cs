@@ -11,29 +11,78 @@ namespace StockSimulator
         static void Main(string[] args)
         {
             //Debug test code
+            /*
             TestClass tc = new TestClass(new GameLogic());
 
             tc.testWriting();
 
             Console.WriteLine("Test Finished");
             Console.In.Read();
+            */
 
             //Actual program operation
-            /*
+            
             ConsoleMenu menu = new ConsoleMenu();
             menu.startMenu();
-            */
+            
         }
 
         void startMenu()
         {
             gl = new GameLogic();
+            int input;
 
-            Console.In.Read();
+            do
+            {
+                Console.WriteLine("01. Sandbox");
+                Console.WriteLine("02. Scenario 1");
+                Console.WriteLine("00. Exit");
+
+                input = Int32.Parse(Console.In.ReadLine());
+
+                switch (input)
+                {
+                    case 01:
+                        //startSandbox();
+                        break;
+                    case 02:
+                        startScenario1();
+                        break;
+                    case 00:
+                        Environment.Exit(0);
+                        break;
+                    default:
+                        break;
+                }
+            } while (input != 00);
+        }
+
+        void startScenario1()
+        {
+            Exchange scenario1 = new Exchange();
+
+            string[] companies =
+            {
+                "FB",   //Facebook
+                "GOOG", //Google
+                "NFLX", //Netflix
+                "AAPL", //Apple
+                "MSFT", //Microsoft
+                "EBAY", //eBay
+                "AMZN", //Amazon
+                "TWTR", //Twitter
+                "PYPL", //Paypal
+                "LNKD"  //LinkedIn
+            };
+
+            foreach(string symbol in companies)
+            {
+                scenario1.Add(symbol);
+                Utilities.arrayify(symbol, WebInterface.queryAPI(symbol), scenario1);
+            }
         }
     }
 
-    [Microsoft.VisualStudio.TestTools.UnitTesting.TestClass]
     class TestClass
     {
         GameLogic gl;
