@@ -102,7 +102,7 @@ namespace StockSimulator
     /// <summary>
     /// Static class to interface with the web API
     /// </summary>
-    public static class webInterface
+    public static class WebInterface
     {
         public static String getPage(string url)
         {
@@ -153,7 +153,7 @@ namespace StockSimulator
     /// <summary>
     /// Static class to interface with files
     /// </summary>
-    public static class fileInterface
+    public static class FileInterface
     {
         /// <summary>
         /// Method to read a MetaStock formatted file and add the data to the specified Exchange
