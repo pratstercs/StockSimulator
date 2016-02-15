@@ -5,7 +5,7 @@ namespace StockSimulator
 {
     class ConsoleMenu
     {
-        //Exchange NYSE;
+        //Exchange ex;
         GameLogic gl;
 
         static void Main(string[] args)
@@ -117,8 +117,8 @@ namespace StockSimulator
 
         public void testExchange()
         {
-            gl.NYSE = new Exchange();
-            //NYSE.Add("JPM");
+            gl.ex = new Exchange();
+            //ex.Add("JPM");
 
             string symbol = "JPM";
 
@@ -127,18 +127,18 @@ namespace StockSimulator
             DateTime startTime = DateTime.Now;
             try
             {
-                FileInterface.readFile(path, gl.NYSE);
+                FileInterface.readFile(path, gl.ex);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
 
-            //readFile(path, NYSE);
+            //readFile(path, ex);
             DateTime stopTime = DateTime.Now;
 
-            StockRow start = gl.NYSE[symbol][Utilities.toDate("20160101")];
-            StockRow end = gl.NYSE[symbol][Utilities.toDate("20160128")];
+            StockRow start = gl.ex[symbol][Utilities.toDate("20160101")];
+            StockRow end = gl.ex[symbol][Utilities.toDate("20160128")];
 
             decimal high = start.high > end.high ? start.high : end.high;
             decimal low = start.low < end.low ? start.low : end.low;
@@ -161,7 +161,7 @@ namespace StockSimulator
 
             //next line from StackOverflow - used to extract data from the SortedDictionary ordered by propery of value, not by key
             //http://stackoverflow.com/a/1332
-            var sortedDic = from entry in gl.NYSE["JPM"] orderby entry.Value.high descending select entry;
+            var sortedDic = from entry in gl.ex["JPM"] orderby entry.Value.high descending select entry;
 
             foreach (var line in sortedDic.ToList())
             {
