@@ -55,6 +55,31 @@ namespace StockSimulator {
             }
         }
 
+        public void writeExchangeToFile(string path, Exchange ex)
+        {
+            string header = "<ticker>,<date>,<open>,<high>,<low>,<close>,<vol>";
+
+            using (FileStream fs = File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
+            using (BufferedStream bs = new BufferedStream(fs))
+            using (StreamWriter sw = new StreamWriter(bs))
+            {
+                foreach(KeyValuePair<string,Ticker> t in ex)
+                { //iterate through symbols in exchnage
+                    string symbol = t.Key;
+
+                    foreach (KeyValuePair<DateTime, StockRow> sr in t.Value)
+                    { //iterate through each day's data for each symbol
+                        string high = sr.Value.high.ToString(); //convert to string from decimal
+                        string low = sr.Value.low.ToString();
+                        string open = sr.Value.open.ToString();
+                        string close = sr.Value.close.ToString();
+                        string volume = sr.Value.volume.ToString();
+
+                        sw.WriteLine(symbol);
+                    }
+                }
+            }
+
         public string queryAPI(string symbol)
         {
             string url = "http://philippratt.co.uk:5000/" + symbol;
