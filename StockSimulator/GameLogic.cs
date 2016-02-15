@@ -79,6 +79,7 @@ namespace StockSimulator {
                     }
                 }
             }
+        }
 
         public string queryAPI(string symbol)
         {
