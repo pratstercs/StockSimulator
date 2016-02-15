@@ -15,72 +15,6 @@ namespace StockSimulator {
 
         }
 
-        /// <summary>
-        /// Method to read a MetaStock formatted file and add the data to the specified Exchange
-        /// </summary>
-        /// <param name="path">The full path to the file to add</param>
-        /// <param name="ex">The Exchange for the data to be added to</param>
-        public void readFile(string path, Exchange ex)
-        {
-            string symbol = "";
-            using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (BufferedStream bs = new BufferedStream(fs))
-            using (StreamReader sr = new StreamReader(bs))
-            {
-                string line;
-
-                if ((line = sr.ReadLine()) == null) //read first line and test if not-null
-                {
-                    return; //if first line is null
-                }
-                else
-                {
-                    if (line[0] == '<') //test if header row is present
-                    {
-                        if ((line = sr.ReadLine()) == null)
-                        {
-                            return; //if header row is present and next row is null, return as no data to process
-                        }
-                    }
-
-                    //get stock symbol and ensure ticker is ready
-                    symbol = line.Split(',')[0];
-                    ex.Add(symbol);
-
-                    do
-                    {
-                        ex[symbol].AddDay(line); //add lines while there are lines to add
-                    } while ((line = sr.ReadLine()) != null);
-                }
-            }
-        }
-
-        public void writeExchangeToFile(string path, Exchange ex)
-        {
-            string header = "<ticker>,<date>,<open>,<high>,<low>,<close>,<vol>";
-
-            using (FileStream fs = File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
-            using (BufferedStream bs = new BufferedStream(fs))
-            using (StreamWriter sw = new StreamWriter(bs))
-            {
-                foreach(KeyValuePair<string,Ticker> t in ex)
-                { //iterate through symbols in exchnage
-                    string symbol = t.Key;
-
-                    foreach (KeyValuePair<DateTime, StockRow> sr in t.Value)
-                    { //iterate through each day's data for each symbol
-                        string high = sr.Value.high.ToString(); //convert to string from decimal
-                        string low = sr.Value.low.ToString();
-                        string open = sr.Value.open.ToString();
-                        string close = sr.Value.close.ToString();
-                        string volume = sr.Value.volume.ToString();
-
-                        sw.WriteLine(symbol);
-                    }
-                }
-            }
-        }
-
         public string queryAPI(string symbol)
         {
             string url = "http://philippratt.co.uk:5000/" + symbol;
@@ -125,7 +59,7 @@ namespace StockSimulator {
         /// </summary>
         /// <param name="response">The response from the API</param>
         /// <returns>A list of stockrow objects from the API response</returns>
-        public List<StockRow> arrayify(string response)
+        public List<StockRow> arrayify(string response, Exchange ex)
         {
             List<StockRow> rows = new List<StockRow>();
 
@@ -210,6 +144,84 @@ namespace StockSimulator {
             WebClient web = new WebClient();
             return web.DownloadString(url);
 
+        }
+    }
+
+    public abstract class fileInterface
+    {
+        /// <summary>
+        /// Method to read a MetaStock formatted file and add the data to the specified Exchange
+        /// </summary>
+        /// <param name="path">The full path to the file to add</param>
+        /// <param name="ex">The Exchange for the data to be added to</param>
+        public void readFile(string path, Exchange ex)
+        {
+            string symbol = "";
+            using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (BufferedStream bs = new BufferedStream(fs))
+            using (StreamReader sr = new StreamReader(bs))
+            {
+                string line;
+
+                if ((line = sr.ReadLine()) == null) //read first line and test if not-null
+                {
+                    return; //if first line is null
+                }
+                else
+                {
+                    if (line[0] == '<') //test if header row is present
+                    {
+                        if ((line = sr.ReadLine()) == null)
+                        {
+                            return; //if header row is present and next row is null, return as no data to process
+                        }
+                    }
+
+                    //get stock symbol and ensure ticker is ready
+                    symbol = line.Split(',')[0];
+                    ex.Add(symbol);
+
+                    do
+                    {
+                        ex[symbol].AddDay(line); //add lines while there are lines to add
+                    } while ((line = sr.ReadLine()) != null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Method to write the specified exchange to a metastock formatted file
+        /// </summary>
+        /// <param name="path">The path of the file to write to</param>
+        /// <param name="ex">The exchange to save</param>
+        public void writeExchangeToFile(string path, Exchange ex)
+        {
+            string header = "<ticker>,<date>,<open>,<high>,<low>,<close>,<vol>";
+
+            using (FileStream fs = File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
+            using (BufferedStream bs = new BufferedStream(fs))
+            using (StreamWriter sw = new StreamWriter(bs))
+            {
+                foreach (KeyValuePair<string, Ticker> t in ex)
+                { //iterate through symbols in exchnage
+                    string symbol = t.Key;
+
+                    foreach (KeyValuePair<DateTime, StockRow> sr in t.Value)
+                    { //iterate through each day's data for each symbol
+                        string date = sr.Key.ToString("YYYYMMDD");
+
+                        string high = sr.Value.high.ToString(); //convert to string from decimal
+                        string low = sr.Value.low.ToString();
+                        string open = sr.Value.open.ToString();
+                        string close = sr.Value.close.ToString();
+                        string volume = sr.Value.volume.ToString();
+
+                        string toWrite = symbol + "," + date + "," + open + "," + high + "," + low + "," + close + "," + volume;
+
+                        sw.WriteLine(toWrite);
+                    }
+                }
+            }
         }
     }
 
