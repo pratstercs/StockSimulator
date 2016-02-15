@@ -33,8 +33,9 @@ namespace StockSimulator
         {
             string path = @"C:\Users\Phil\Desktop\out.txt";
             Exchange ex = new Exchange();
-            gl.queryAPI("JPM");
-
+            string response = WebInterface.queryAPI("JPM");
+            Utilities.arrayify("JPM", response, ex);
+            FileInterface.writeExchangeToFile(path, ex);
         }
 
         void testTicker()
@@ -63,7 +64,7 @@ namespace StockSimulator
             DateTime startTime = DateTime.Now;
             try
             {
-                fileInterface.readFile(path, gl.NYSE);
+                FileInterface.readFile(path, gl.NYSE);
             }
             catch (Exception e)
             {
