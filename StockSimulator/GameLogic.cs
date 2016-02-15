@@ -217,7 +217,7 @@ namespace StockSimulator
 
                     foreach (KeyValuePair<DateTime, StockRow> sr in t.Value)
                     { //iterate through each day's data for each symbol
-                        string date = sr.Key.ToString("YYYYMMDD");
+                        string date = sr.Key.ToString("yyyyMMdd");
 
                         string high = sr.Value.high.ToString(); //convert to string from decimal
                         string low = sr.Value.low.ToString();
