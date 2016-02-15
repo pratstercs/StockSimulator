@@ -2,18 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 
 namespace StockSimulator {
     public class GameLogic
     {
         public Exchange NYSE;
-        private readonly string API_KEY = "VAjcx6n - wo8WLqb6VD - p";
 
         public GameLogic()
         {
@@ -77,20 +72,41 @@ namespace StockSimulator {
             }
         }
 
-        public string[,] arrayify(string response)
+        /// <summary>
+        /// Method to read in the API response and parse it into StockRow objects
+        /// </summary>
+        /// <param name="response">The response from the API</param>
+        /// <returns>A list of stockrow objects from the API response</returns>
+        public List<StockRow> arrayify(string response)
         {
+            List<StockRow> rows = new List<StockRow>();
+
             Regex regex = new Regex(@"\[([^\[].*?[^\]])\]"); //split response into the subarrays
             MatchCollection matches = regex.Matches(response); //get all matches
-            string[,] array = new string[matches.Count, 6]; //create return array with the right sizes
+
             foreach(Match m in matches)
             {
-                string match = m.ToString();
-                match = match.Substring(1, match.Length - 2);
-                string[] splitted = match.Split(',');
+                string[] splitted = m.ToString().Split(','); //split the match into each component
+
+                for(int i = 0; i < splitted.Length; i++) //trim redundant characters from each component
+                {
+                    splitted[i] = splitted[i].Trim(new Char[] { '[', ' ', ']', '"' });
+                }
+
                 //parse datetime and decimals
+                StockRow sr = new StockRow(
+                    DateTime.Parse(splitted[0]),    //date
+                    Decimal.Parse(splitted[1]),     //open
+                    Decimal.Parse(splitted[2]),     //high
+                    Decimal.Parse(splitted[3]),     //low
+                    Decimal.Parse(splitted[4]),     //close
+                    Convert.ToInt32(Decimal.Parse(splitted[5]))  //volume
+                    );
+
+                rows.Add(sr); //add result to the list
             }
 
-            return array;
+            return rows;
         }
     }
 
