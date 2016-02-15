@@ -93,9 +93,9 @@ namespace StockSimulator {
     }
 
     /// <summary>
-    /// Abstract class to store useful static methods
+    /// Static class to store misc static methods
     /// </summary>
-    public abstract class Utilities
+    public static class Utilities
     {
         /// <summary>
         /// Converts a MetaStock formatted date ("YYYYMMDD") into a DateTime object
@@ -137,7 +137,10 @@ namespace StockSimulator {
         }
     }
 
-    public abstract class webInterface
+    /// <summary>
+    /// Static class to interface with the web API
+    /// </summary>
+    public static class webInterface
     {
         public static String getPage(string url)
         {
@@ -147,14 +150,17 @@ namespace StockSimulator {
         }
     }
 
-    public abstract class fileInterface
+    /// <summary>
+    /// Static class to interface with files
+    /// </summary>
+    public static class fileInterface
     {
         /// <summary>
         /// Method to read a MetaStock formatted file and add the data to the specified Exchange
         /// </summary>
         /// <param name="path">The full path to the file to add</param>
         /// <param name="ex">The Exchange for the data to be added to</param>
-        public void readFile(string path, Exchange ex)
+        public static void readFile(string path, Exchange ex)
         {
             string symbol = "";
             using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -194,7 +200,7 @@ namespace StockSimulator {
         /// </summary>
         /// <param name="path">The path of the file to write to</param>
         /// <param name="ex">The exchange to save</param>
-        public void writeExchangeToFile(string path, Exchange ex)
+        public static void writeExchangeToFile(string path, Exchange ex)
         {
             string header = "<ticker>,<date>,<open>,<high>,<low>,<close>,<vol>";
 
