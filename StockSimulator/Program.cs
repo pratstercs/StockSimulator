@@ -29,7 +29,7 @@ namespace StockSimulator
 
         void startMenu()
         {
-            gl = new GameLogic();
+            //gl = new GameLogic();
             int input;
 
             do
@@ -72,7 +72,7 @@ namespace StockSimulator
                 "AMZN", //Amazon
                 "TWTR", //Twitter
                 "PYPL", //Paypal
-                "LNKD"  //LinkedIn
+                "YHOO"  //Yahoo
             };
 
             foreach(string symbol in companies)
