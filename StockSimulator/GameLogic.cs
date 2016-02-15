@@ -15,82 +15,6 @@ namespace StockSimulator
         {
 
         }
-
-        public string queryAPI(string symbol)
-        {
-            string url = "http://philippratt.co.uk:5000/" + symbol;
-            return getData(url);
-        }
-        public string queryAPI(string symbol, string startDate)
-        {
-            //format .../symbol/YYYYMMDD
-            string url = "http://philippratt.co.uk:5000/" + symbol + "/" + startDate;
-            return getData(url);
-        }
-        public string queryAPI(string symbol, string startDate, string endDate)
-        {
-            //format .../symbol/YYYYMMDD/YYYYMMDD
-            string url = "http://philippratt.co.uk:5000/" + symbol + "/" + startDate + "/" + endDate;
-            return getData(url);
-        }
-
-        /// <summary>
-        /// Method to download the API response
-        /// </summary>
-        /// <param name="url">The URL to download</param>
-        /// <returns>The string API response</returns>
-        private string getData(string url)
-        {
-            string data = "";
-
-            try
-            {
-                data = new WebClient().DownloadString(url);
-                return data;
-            }
-            catch (WebException e)
-            {
-                Console.Write(e.ToString());
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Method to read in the API response, parse it into StockRow objects and add it to the specified exchange
-        /// </summary>
-        /// <param name="response">The response from the API</param>
-        /// <returns>A list of stockrow objects from the API response</returns>
-        public static void arrayify(string symbol, string response, Exchange ex)
-        {
-            Regex regex = new Regex(@"\[([^\[].*?[^\]])\]"); //split response into the subarrays
-            MatchCollection matches = regex.Matches(response); //get all matches
-
-            ex.Add(symbol); //ensure there exists a ticker for the symbol
-
-            foreach (Match m in matches)
-            {
-                string[] splitted = m.ToString().Split(','); //split the match into each component
-
-                for (int i = 0; i < splitted.Length; i++) //trim redundant characters from each component
-                {
-                    splitted[i] = splitted[i].Trim(new Char[] { '[', ' ', ']', '"' });
-                }
-
-                DateTime date = DateTime.Parse(splitted[0]);
-
-                //parse datetime and decimals
-                StockRow sr = new StockRow(
-                    date,    //date
-                    Decimal.Parse(splitted[1]),     //open
-                    Decimal.Parse(splitted[2]),     //high
-                    Decimal.Parse(splitted[3]),     //low
-                    Decimal.Parse(splitted[4]),     //close
-                    Convert.ToInt32(Decimal.Parse(splitted[5]))  //volume
-                    );
-
-                ex[symbol].Add(date, sr);
-            }
-        }
     }
 
     /// <summary>
@@ -136,6 +60,43 @@ namespace StockSimulator
 
             return row;
         }
+
+        /// <summary>
+        /// Method to read in the API response, parse it into StockRow objects and add it to the specified exchange
+        /// </summary>
+        /// <param name="response">The response from the API</param>
+        /// <returns>A list of stockrow objects from the API response</returns>
+        public static void arrayify(string symbol, string response, Exchange ex)
+        {
+            Regex regex = new Regex(@"\[([^\[].*?[^\]])\]"); //split response into the subarrays
+            MatchCollection matches = regex.Matches(response); //get all matches
+
+            ex.Add(symbol); //ensure there exists a ticker for the symbol
+
+            foreach (Match m in matches)
+            {
+                string[] splitted = m.ToString().Split(','); //split the match into each component
+
+                for (int i = 0; i < splitted.Length; i++) //trim redundant characters from each component
+                {
+                    splitted[i] = splitted[i].Trim(new Char[] { '[', ' ', ']', '"' });
+                }
+
+                DateTime date = DateTime.Parse(splitted[0]);
+
+                //parse datetime and decimals
+                StockRow sr = new StockRow(
+                    date,    //date
+                    Decimal.Parse(splitted[1]),     //open
+                    Decimal.Parse(splitted[2]),     //high
+                    Decimal.Parse(splitted[3]),     //low
+                    Decimal.Parse(splitted[4]),     //close
+                    Convert.ToInt32(Decimal.Parse(splitted[5]))  //volume
+                    );
+
+                ex[symbol].Add(date, sr);
+            }
+        }
     }
 
     /// <summary>
@@ -147,7 +108,45 @@ namespace StockSimulator
         {
             WebClient web = new WebClient();
             return web.DownloadString(url);
+        }
 
+        public static string queryAPI(string symbol)
+        {
+            string url = "http://philippratt.co.uk:5000/" + symbol;
+            return getData(url);
+        }
+        public static string queryAPI(string symbol, string startDate)
+        {
+            //format .../symbol/YYYYMMDD
+            string url = "http://philippratt.co.uk:5000/" + symbol + "/" + startDate;
+            return getData(url);
+        }
+        public static string queryAPI(string symbol, string startDate, string endDate)
+        {
+            //format .../symbol/YYYYMMDD/YYYYMMDD
+            string url = "http://philippratt.co.uk:5000/" + symbol + "/" + startDate + "/" + endDate;
+            return getData(url);
+        }
+
+        /// <summary>
+        /// Method to download the API response
+        /// </summary>
+        /// <param name="url">The URL to download</param>
+        /// <returns>The string API response</returns>
+        private static string getData(string url)
+        {
+            string data = "";
+
+            try
+            {
+                data = new WebClient().DownloadString(url);
+                return data;
+            }
+            catch (WebException e)
+            {
+                Console.Write(e.ToString());
+                return null;
+            }
         }
     }
 
