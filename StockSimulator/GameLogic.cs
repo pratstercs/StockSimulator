@@ -5,7 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 
-namespace StockSimulator {
+namespace StockSimulator
+{
     public class GameLogic
     {
         public Exchange NYSE;
@@ -55,29 +56,31 @@ namespace StockSimulator {
         }
 
         /// <summary>
-        /// Method to read in the API response and parse it into StockRow objects
+        /// Method to read in the API response, parse it into StockRow objects and add it to the specified exchange
         /// </summary>
         /// <param name="response">The response from the API</param>
         /// <returns>A list of stockrow objects from the API response</returns>
-        public List<StockRow> arrayify(string response, Exchange ex)
+        public static void arrayify(string symbol, string response, Exchange ex)
         {
-            List<StockRow> rows = new List<StockRow>();
-
             Regex regex = new Regex(@"\[([^\[].*?[^\]])\]"); //split response into the subarrays
             MatchCollection matches = regex.Matches(response); //get all matches
 
-            foreach(Match m in matches)
+            ex.Add(symbol); //ensure there exists a ticker for the symbol
+
+            foreach (Match m in matches)
             {
                 string[] splitted = m.ToString().Split(','); //split the match into each component
 
-                for(int i = 0; i < splitted.Length; i++) //trim redundant characters from each component
+                for (int i = 0; i < splitted.Length; i++) //trim redundant characters from each component
                 {
                     splitted[i] = splitted[i].Trim(new Char[] { '[', ' ', ']', '"' });
                 }
 
+                DateTime date = DateTime.Parse(splitted[0]);
+
                 //parse datetime and decimals
                 StockRow sr = new StockRow(
-                    DateTime.Parse(splitted[0]),    //date
+                    date,    //date
                     Decimal.Parse(splitted[1]),     //open
                     Decimal.Parse(splitted[2]),     //high
                     Decimal.Parse(splitted[3]),     //low
@@ -85,10 +88,8 @@ namespace StockSimulator {
                     Convert.ToInt32(Decimal.Parse(splitted[5]))  //volume
                     );
 
-                rows.Add(sr); //add result to the list
+                ex[symbol].Add(date, sr);
             }
-
-            return rows;
         }
     }
 
@@ -236,50 +237,52 @@ namespace StockSimulator {
     /// SortedDictionary to speed up symbol access when large amounts of stocks are loaded
     /// </summary>
     public class Exchange : SortedDictionary<string, Ticker>
+    {
+        /// <summary>
+        /// Adds a new Ticker (symbol, e.g. AAPL) to the Exchange
+        /// </summary>
+        /// <param name="symbol">The stock symbol (e.g. AAPL) to add</param>
+        public void Add(string symbol)
         {
-            /// <summary>
-            /// Adds a new Ticker (symbol, e.g. AAPL) to the Exchange
-            /// </summary>
-            /// <param name="symbol">The stock symbol (e.g. AAPL) to add</param>
-            public void Add(string symbol)
-            {
-                if (!this.ContainsKey(symbol)) { //ensure no duplicate symbols are added
-                    this.Add(symbol, new Ticker());
-                }
-            }
-
-            /// <summary>
-            /// Returns a list of the KVPairs contained in the specified Ticker, ordered by the specified property (high to low)
-            /// </summary>
-            /// <param name="symbol">The symbol's data to extract</param>
-            /// <param name="property">The property to sort on (open,high,low,close,volume)</param>
-            /// <returns>The sorted list of KVPs</returns>
-            public List<KeyValuePair<DateTime, StockRow>> getSorted(string symbol, string property)
-            {
-                IOrderedEnumerable<KeyValuePair<DateTime, StockRow>> sortedDic;
-
-                switch(symbol) {
-                    case "high" :
-                        sortedDic = from entry in this[symbol] orderby entry.Value.high descending select entry;
-                        break;
-                    case "low" :
-                        sortedDic = from entry in this[symbol] orderby entry.Value.low descending select entry;
-                        break;
-                    case "close" :
-                        sortedDic = from entry in this[symbol] orderby entry.Value.high descending select entry;
-                        break;
-                    case "volume" :
-                        sortedDic = from entry in this[symbol] orderby entry.Value.high descending select entry;
-                        break;
-                    case "open" :
-                    default:
-                        sortedDic = from entry in this[symbol] orderby entry.Value.open descending select entry;
-                        break;
-                }
-
-                return new List<KeyValuePair<DateTime, StockRow>>(sortedDic);
+            if (!this.ContainsKey(symbol))
+            { //ensure no duplicate symbols are added
+                this.Add(symbol, new Ticker());
             }
         }
+
+        /// <summary>
+        /// Returns a list of the KVPairs contained in the specified Ticker, ordered by the specified property (high to low)
+        /// </summary>
+        /// <param name="symbol">The symbol's data to extract</param>
+        /// <param name="property">The property to sort on (open,high,low,close,volume)</param>
+        /// <returns>The sorted list of KVPs</returns>
+        public List<KeyValuePair<DateTime, StockRow>> getSorted(string symbol, string property)
+        {
+            IOrderedEnumerable<KeyValuePair<DateTime, StockRow>> sortedDic;
+
+            switch (symbol)
+            {
+                case "high":
+                    sortedDic = from entry in this[symbol] orderby entry.Value.high descending select entry;
+                    break;
+                case "low":
+                    sortedDic = from entry in this[symbol] orderby entry.Value.low descending select entry;
+                    break;
+                case "close":
+                    sortedDic = from entry in this[symbol] orderby entry.Value.high descending select entry;
+                    break;
+                case "volume":
+                    sortedDic = from entry in this[symbol] orderby entry.Value.high descending select entry;
+                    break;
+                case "open":
+                default:
+                    sortedDic = from entry in this[symbol] orderby entry.Value.open descending select entry;
+                    break;
+            }
+
+            return new List<KeyValuePair<DateTime, StockRow>>(sortedDic);
+        }
+    }
 
     /// <summary>
     /// Class to store the individual Symbol's stock data.

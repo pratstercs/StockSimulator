@@ -24,6 +24,8 @@ namespace StockSimulator
         {
             gl = new GameLogic();
 
+            testWriting();
+
             Console.In.Read();
         }
 
@@ -61,7 +63,7 @@ namespace StockSimulator
             DateTime startTime = DateTime.Now;
             try
             {
-                gl.readFile(path, gl.NYSE);
+                fileInterface.readFile(path, gl.NYSE);
             }
             catch (Exception e)
             {
