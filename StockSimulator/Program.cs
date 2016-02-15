@@ -24,18 +24,15 @@ namespace StockSimulator
         {
             gl = new GameLogic();
 
-            string data;
-            
-            data = gl.queryAPI("JPM");
-            Console.WriteLine(data);
-
-            data = gl.queryAPI("JPM", "20160101");
-            Console.WriteLine(data);
-
-            data = gl.queryAPI("JPM", "20160101", "20160131");
-            Console.WriteLine(data);
-
             Console.In.Read();
+        }
+
+        void testWriting()
+        {
+            string path = @"C:\Users\Phil\Desktop\out.txt";
+            Exchange ex = new Exchange();
+            gl.queryAPI("JPM");
+
         }
 
         void testTicker()
