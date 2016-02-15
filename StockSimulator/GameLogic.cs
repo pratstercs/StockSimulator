@@ -55,10 +55,32 @@ namespace StockSimulator {
             }
         }
 
-        public string getData(string symbol)
+        public string queryAPI(string symbol)
+        {
+            string url = "http://philippratt.co.uk:5000/" + symbol;
+            return getData(url);
+        }
+        public string queryAPI(string symbol, string startDate)
+        {
+            //format .../symbol/YYYYMMDD
+            string url = "http://philippratt.co.uk:5000/" + symbol + "/" + startDate;
+            return getData(url);
+        }
+        public string queryAPI(string symbol, string startDate, string endDate)
+        {
+            //format .../symbol/YYYYMMDD/YYYYMMDD
+            string url = "http://philippratt.co.uk:5000/" + symbol + "/" + startDate + "/" + endDate;
+            return getData(url);
+        }
+
+        /// <summary>
+        /// Method to download the API response
+        /// </summary>
+        /// <param name="url">The URL to download</param>
+        /// <returns>The string API response</returns>
+        private string getData(string url)
         {
             string data = "";
-            string url = "http://philippratt.co.uk:5000/" + symbol;
 
             try
             {
