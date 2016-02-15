@@ -24,17 +24,16 @@ namespace StockSimulator
         {
             gl = new GameLogic();
 
-            //testExchange();
-            //testGrouping();
+            string data;
+            
+            data = gl.queryAPI("JPM");
+            Console.WriteLine(data);
 
-            //string response = 
-            //gl.parseJSON("JPM");
-            //Console.Write(response);
+            data = gl.queryAPI("JPM", "20160101");
+            Console.WriteLine(data);
 
-            string data = gl.getData("JPM");
-            gl.arrayify(data);
-
-            Console.Write(data);
+            data = gl.queryAPI("JPM", "20160101", "20160131");
+            Console.WriteLine(data);
 
             Console.In.Read();
         }
