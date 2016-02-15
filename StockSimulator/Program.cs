@@ -38,6 +38,7 @@ namespace StockSimulator
                 Console.WriteLine("02. Scenario 1");
                 Console.WriteLine("00. Exit");
 
+                Console.Write("Selection: ");
                 input = Int32.Parse(Console.In.ReadLine());
 
                 switch (input)
@@ -75,12 +76,22 @@ namespace StockSimulator
                 "YHOO"  //Yahoo
             };
 
+            Console.WriteLine("Downloading data...");
             foreach(string symbol in companies)
             {
                 scenario1.Add(symbol);
                 Utilities.arrayify(symbol, WebInterface.queryAPI(symbol), scenario1);
             }
+            Console.WriteLine("Download complete!");
+
+            GameLogic gl = new GameLogic(scenario1);
+
+            //test code
+            TestClass tc = new TestClass(gl);
+            tc.testBuying();
         }
+
+        
     }
 
     class TestClass
@@ -167,6 +178,16 @@ namespace StockSimulator
             {
                 Console.WriteLine(line.Value.date + " - $" + line.Value.high);
             }
+        }
+
+        public void testBuying()
+        {
+            gl.cash = 1000000.0M;
+            gl.buyStock(new DateTime(2016, 1, 4), "GOOG", 100);
+            gl.buyStock(new DateTime(2016, 1, 4), "AAPL", 73);
+            decimal[] results = gl.calculateProfitLoss(new DateTime(2016, 2, 4));
+            Console.WriteLine("Profit: " + results[0]); //numberformat.currencynegativepattern?
+            Console.WriteLine("Percentage change: " + results[1] + "%");
         }
     }
 

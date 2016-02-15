@@ -9,9 +9,9 @@ namespace StockSimulator
 {
     public class GameLogic
     {
-        public Exchange ex;
-        public List<Stock> wallet = new List<Stock>();
-        decimal cash;
+        public Exchange ex; //make private with accessors
+        public List<Stock> wallet = new List<Stock>(); //make private with accessors
+        public decimal cash; //make private
 
         public GameLogic()
         {
@@ -56,12 +56,14 @@ namespace StockSimulator
 
             foreach(Stock purchase in wallet)
             {
-                currentPrice += ex[purchase.symbol][date].close;
-                totalCost += purchase.purchasePrice;
+                currentPrice += (ex[purchase.symbol][date].close * purchase.amount);
+                totalCost += (purchase.purchasePrice * purchase.amount);
             }
 
             decimal profit = currentPrice - totalCost;
             decimal percProfit = (profit / totalCost) * 100;
+            profit = Decimal.Round(profit, 2);
+            percProfit = Decimal.Round(percProfit, 2);
 
             return new decimal[2] { profit, percProfit };
         }
