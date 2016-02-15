@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Diagnostics;
 
 namespace StockSimulator
 {
@@ -16,20 +10,40 @@ namespace StockSimulator
 
         static void Main(string[] args)
         {
+            //Debug test code
+            TestClass tc = new TestClass(new GameLogic());
+
+            tc.testWriting();
+
+            Console.WriteLine("Test Finished");
+            Console.In.Read();
+
+            //Actual program operation
+            /*
             ConsoleMenu menu = new ConsoleMenu();
-            menu.menu();
+            menu.startMenu();
+            */
         }
 
-        void menu()
+        void startMenu()
         {
             gl = new GameLogic();
 
-            testWriting();
-
             Console.In.Read();
         }
+    }
 
-        void testWriting()
+    [Microsoft.VisualStudio.TestTools.UnitTesting.TestClass]
+    class TestClass
+    {
+        GameLogic gl;
+
+        public TestClass(GameLogic gamelogic)
+        {
+            gl = gamelogic;
+        }
+
+        public void testWriting()
         {
             string path = @"C:\Users\Phil\Desktop\out.txt";
             Exchange ex = new Exchange();
@@ -38,7 +52,7 @@ namespace StockSimulator
             FileInterface.writeExchangeToFile(path, ex);
         }
 
-        void testTicker()
+        public void testTicker()
         {
             Ticker JPM = new Ticker();
             JPM.AddDay("JPM,20150102,62.62,62.96,62.07,62.49,12599900");
@@ -52,7 +66,7 @@ namespace StockSimulator
             Console.Out.WriteLine(high);
         } //raw hardcoded single string
 
-        void testExchange()
+        public void testExchange()
         {
             gl.NYSE = new Exchange();
             //NYSE.Add("JPM");
@@ -70,7 +84,7 @@ namespace StockSimulator
             {
                 Console.WriteLine(e.Message);
             }
-            
+
             //readFile(path, NYSE);
             DateTime stopTime = DateTime.Now;
 
@@ -92,7 +106,7 @@ namespace StockSimulator
             Console.Out.WriteLine("Time taken: " + time.TotalMilliseconds + "ms");
         }
 
-        void testGrouping()
+        public void testGrouping()
         {
             testExchange();
 
@@ -106,6 +120,8 @@ namespace StockSimulator
             }
         }
     }
-}
 
-        
+    class GameMenu {
+
+    }
+}
