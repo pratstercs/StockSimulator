@@ -204,10 +204,13 @@ namespace StockSimulator
         {
             string header = "<ticker>,<date>,<open>,<high>,<low>,<close>,<vol>";
 
+            File.WriteAllText(path, string.Empty); //ensures file is empty before writing
+
             using (FileStream fs = File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
-            using (BufferedStream bs = new BufferedStream(fs))
-            using (StreamWriter sw = new StreamWriter(bs))
+            using (StreamWriter sw = new StreamWriter(new BufferedStream(fs)))
             {
+                sw.WriteLine(header);
+
                 foreach (KeyValuePair<string, Ticker> t in ex)
                 { //iterate through symbols in exchnage
                     string symbol = t.Key;
@@ -227,6 +230,8 @@ namespace StockSimulator
                         sw.WriteLine(toWrite);
                     }
                 }
+
+                sw.Close(); //closes the file and ensures the buffer is flushed
             }
         }
     }
