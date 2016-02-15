@@ -36,6 +36,7 @@ namespace StockSimulator
             {
                 wallet.Add(
                     new Stock(
+                        symbol,
                         date,
                         sr.close,
                         amount
@@ -43,9 +44,26 @@ namespace StockSimulator
                     );
                 //ex[symbol][date].volume -= amount; //can't modify directly for some reason. Will leave as edge case - unlikely someone will want to buy more than is available of a company
                 cash -= totalCost;
+
+                return true;
+            }
+        }
+
+        public decimal[] calculateProfitLoss(DateTime date)
+        {
+            decimal totalCost = 0;
+            decimal currentPrice = 0;
+
+            foreach(Stock purchase in wallet)
+            {
+                currentPrice += ex[purchase.symbol][date].close;
+                totalCost += purchase.purchasePrice;
             }
 
-            return true;
+            decimal profit = currentPrice - totalCost;
+            decimal percProfit = (profit / totalCost) * 100;
+
+            return new decimal[2] { profit, percProfit };
         }
     }
 
@@ -390,9 +408,11 @@ namespace StockSimulator
         public DateTime purchaseDate { get; }
         public decimal purchasePrice { get; }
         public int amount { get; }
+        public string symbol { get; }
 
-        public Stock(DateTime date, decimal price, int volume)
+        public Stock(string sym, DateTime date, decimal price, int volume)
         {
+            symbol = sym;
             purchaseDate = date;
             purchasePrice = price;
             amount = volume;
