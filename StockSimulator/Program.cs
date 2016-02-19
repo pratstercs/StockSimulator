@@ -60,7 +60,7 @@ namespace StockSimulator
 
         void startScenario1()
         {
-            Exchange scenario1 = new Exchange();
+            Exchange scenario1ex = new Exchange();
 
             string[] companies =
             {
@@ -79,12 +79,12 @@ namespace StockSimulator
             Console.WriteLine("Downloading data...");
             foreach(string symbol in companies)
             {
-                scenario1.Add(symbol);
-                Utilities.arrayify(symbol, WebInterface.queryAPI(symbol), scenario1);
+                scenario1ex.Add(symbol);
+                Utilities.arrayify(symbol, WebInterface.queryAPI(symbol), scenario1ex);
             }
             Console.WriteLine("Download complete!");
 
-            GameLogic gl = new GameLogic(scenario1);
+            GameLogic gl = new GameLogic(scenario1ex);
 
             //test code
             TestClass tc = new TestClass(gl);
