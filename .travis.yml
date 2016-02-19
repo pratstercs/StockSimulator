@@ -1,2 +1,5 @@
 language: csharp
 solution: StockSimulator.sln
+
+script:
+  - xbuild /p:Configuration=Debug StockSimulator.sln
