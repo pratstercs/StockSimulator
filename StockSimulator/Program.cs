@@ -11,20 +11,20 @@ namespace StockSimulator
         static void Main(string[] args)
         {
             //Debug test code
-            /*
+            
             TestClass tc = new TestClass(new GameLogic());
 
-            tc.testWriting();
+            tc.testSell();
 
             Console.WriteLine("Test Finished");
             Console.In.Read();
-            */
+            
 
             //Actual program operation
-            
+            /*
             ConsoleMenu menu = new ConsoleMenu();
             menu.startMenu();
-            
+            */
         }
 
         void startMenu()
@@ -188,6 +188,24 @@ namespace StockSimulator
             decimal[] results = gl.calculateProfitLoss(new DateTime(2016, 2, 4));
             Console.WriteLine("Profit: " + results[0]); //numberformat.currencynegativepattern?
             Console.WriteLine("Percentage change: " + results[1] + "%");
+        }
+
+        public void testSell()
+        {
+            gl.cash = 0.00M;
+
+            DateTime now = new DateTime();
+
+            gl.ex.Add("AAPL");
+            gl.ex["AAPL"].Add(now, new StockRow(now, 3.0M, 3.0M, 3.0M, 3.0M, 1000));
+
+            gl.wallet.Add(new Stock("AAPL", now, 10.0M, 5));
+            gl.wallet.Add(new Stock("AAPL", now, 4.0M, 2));
+            gl.wallet.Add(new Stock("JPM",  now, 200.0M, 10));
+
+            gl.sellStock(new DateTime(), "AAPL", 6);
+
+            Console.WriteLine(gl.cash);
         }
     }
 
