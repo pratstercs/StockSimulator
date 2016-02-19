@@ -141,6 +141,11 @@ namespace StockSimulator
 
             return new decimal[2] { profit, percProfit };
         }
+
+        public void incrementDate()
+        {
+            DayOfWeek currentDay = currentDate.DayOfWeek;
+        }
     }
 
     /// <summary>
