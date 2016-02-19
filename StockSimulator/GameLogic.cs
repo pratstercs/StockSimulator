@@ -14,13 +14,19 @@ namespace StockSimulator
         public Exchange ex; //TODO: make private with accessors
         public List<Stock> wallet = new List<Stock>(); //TODO: make private with accessors
         public decimal cash; //TODO: make private
+        public DateTime currentDate;
 
         public GameLogic()
         {
             ex = new Exchange();
         }
 
-        public GameLogic(Exchange e)
+        /// <summary>
+        /// Constructor for pre-configured scenario
+        /// </summary>
+        /// <param name="e">The prebuilt exchange to use</param>
+        /// <param name="time">The date on which to start the scenario</param>
+        public GameLogic(Exchange e, DateTime time)
         {
             ex = e;
         }

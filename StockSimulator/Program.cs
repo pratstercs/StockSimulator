@@ -84,7 +84,8 @@ namespace StockSimulator
             }
             Console.WriteLine("Download complete!");
 
-            GameLogic gl = new GameLogic(scenario1ex);
+            DateTime toStart = scenario1ex.First().Value.First().Value.date; //get date of first entry - start scenario on this date
+            GameLogic gl = new GameLogic(scenario1ex, toStart); //launch GameLogic instance with data
 
             //test code
             TestClass tc = new TestClass(gl);
