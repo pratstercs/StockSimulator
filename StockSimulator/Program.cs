@@ -57,7 +57,11 @@ namespace StockSimulator
             } while (input != 00);
         }
 
-        void startScenario1()
+        /// <summary>
+        /// Method to set up the scenario with the relevant data
+        /// </summary>
+        // TODO: Move this code out the CLI version and into main block
+        GameLogic startScenario1()
         {
             Exchange scenario1ex = new Exchange();
 
@@ -89,6 +93,8 @@ namespace StockSimulator
             //test code
             TestClass tc = new TestClass(gl);
             tc.testBuying();
+
+            return gl;
         }
     }
 
