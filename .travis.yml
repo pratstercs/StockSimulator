@@ -2,4 +2,8 @@ language: csharp
 solution: StockSimulator.sln
 
 script:
+<<<<<<< HEAD
   - xbuild /p:Configuration=Debug StockSimulator.sln
+=======
+  - xbuild /p:Configuration=Release StockSimulator.sln
+>>>>>>> 9c29835c94d206df7be98a26377c5ee87a2550c8
