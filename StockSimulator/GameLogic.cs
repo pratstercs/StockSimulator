@@ -5,13 +5,15 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 
+//TODO: Handle weekends - use next day's data? Or just don't allow?
+
 namespace StockSimulator
 {
     public class GameLogic
     {
-        public Exchange ex; //make private with accessors
-        public List<Stock> wallet = new List<Stock>(); //make private with accessors
-        public decimal cash; //make private
+        public Exchange ex; //TODO: make private with accessors
+        public List<Stock> wallet = new List<Stock>(); //TODO: make private with accessors
+        public decimal cash; //TODO: make private
 
         public GameLogic()
         {
@@ -23,6 +25,13 @@ namespace StockSimulator
             ex = e;
         }
 
+        /// <summary>
+        /// Method to buy stocks from the exchange and add to the user's wallet
+        /// </summary>
+        /// <param name="date">The date of the data to use when buying</param>
+        /// <param name="symbol">The stock symbol to purchase</param>
+        /// <param name="amount">The number of stocks to purchase</param>
+        /// <returns>Bool whether the purchase completed successfully</returns>
         public bool buyStock(DateTime date, string symbol, int amount)
         {
             StockRow sr = ex[symbol][date];
@@ -49,6 +58,65 @@ namespace StockSimulator
             }
         }
 
+        /// <summary>
+        /// Method to sell stocks from the wallet to the exchange
+        /// </summary>
+        /// <param name="date">The date of the data to use when buying</param>
+        /// <param name="symbol">The stock symbol to purchase</param>
+        /// <param name="amount">The number of stocks to purchase</param>
+        /// <returns>Bool whether the sale completed successfully</returns>
+        public bool sellStock(DateTime date, string symbol, int amount)
+        {
+            IOrderedEnumerable<Stock> currentStocks = from entry in wallet where entry.symbol==symbol orderby entry.amount ascending select entry; //extract matching stocks from wallet
+
+            int amountHeld = 0;
+
+            foreach(Stock s in currentStocks)
+            {
+                amountHeld += s.amount;
+            }
+
+            if (amount <= amountHeld) //if amountToSell is less than or equal to the amount held
+            {
+                int remainingToSell = amount;
+                decimal cost = ex[symbol][date].close * amount; //calculate total cost of sale
+
+                IEnumerator<Stock> e = currentStocks.GetEnumerator();
+                e.MoveNext(); //move enumerator to first element in collection
+                while (remainingToSell > 0)
+                {
+                    Stock current = e.Current;
+
+                    if (current.amount > remainingToSell) //current stock chunk is enough to cover sale
+                    {
+                        current.amount -= remainingToSell; //remove the sale amount from the current chunk
+                        remainingToSell = 0; //no more still to sell 
+                    }
+                    else //need to use next chunk of stocks
+                    {
+                        wallet.Remove(current); //remove the chunk just sold from the wallet
+                        remainingToSell -= current.amount; //decrement remaining by the chunk just sold
+
+                        e.MoveNext(); //move enumerator to the next element
+                    }
+                }
+
+                //ex["AAPL"][date].volume += amount; //can't edit directly, but edge case - will user want to buy back stocks on the same day?
+                cash += cost; //add cost of sale to cash balance
+
+                return true;
+            }
+            else //if amountToSell is greater than the amount held
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Method to compare the purchase prices of the user's held stocks with the current sale price
+        /// </summary>
+        /// <param name="date">The date to class as "current"</param>
+        /// <returns>A decimal array containing the numerical and percentage changes</returns>
         public decimal[] calculateProfitLoss(DateTime date)
         {
             decimal totalCost = 0;
@@ -380,7 +448,7 @@ namespace StockSimulator
         public decimal close { get; }
         public decimal high { get; }
         public decimal low { get; }
-        public int volume { get; }
+        public int volume { get; set; }
 
         /// <summary>
         /// Constructor for the individual values
@@ -409,7 +477,7 @@ namespace StockSimulator
     {
         public DateTime purchaseDate { get; }
         public decimal purchasePrice { get; }
-        public int amount { get; }
+        public int amount { get; set; }
         public string symbol { get; }
 
         public Stock(string sym, DateTime date, decimal price, int volume)
