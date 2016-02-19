@@ -6,6 +6,8 @@ using System.Net;
 using System.Text.RegularExpressions;
 
 //TODO: Handle weekends - use next day's data? Or just don't allow?
+//TODO: ensure date is a working day - i.e. has data
+//TODO: handle bank holidays - days where data is missing
 
 namespace StockSimulator
 {
@@ -142,9 +144,13 @@ namespace StockSimulator
             return new decimal[2] { profit, percProfit };
         }
 
+        /// <summary>
+        /// Method to increment the date to the next working day
+        /// </summary>
         public void incrementDate()
         {
-            DayOfWeek currentDay = currentDate.DayOfWeek;
+            int daysToIncrement = Utilities.testWorkingDay(currentDate);
+            currentDate.AddDays(daysToIncrement);
         }
     }
 
@@ -226,6 +232,27 @@ namespace StockSimulator
                     );
 
                 ex[symbol].Add(date, sr);
+            }
+        }
+
+        /// <summary>
+        /// Method to test the day of week of the specified date
+        /// </summary>
+        /// <param name="date">The date to test</param>
+        /// <returns>The number of days until the next working day</returns>
+        public static int testWorkingDay(DateTime date)
+        {
+            DayOfWeek day = date.DayOfWeek;
+
+            switch(day)
+            {
+                case DayOfWeek.Friday:
+                    return 3;
+                case DayOfWeek.Saturday:
+                    return 2;
+                case DayOfWeek.Sunday:
+                default:
+                    return 1;
             }
         }
     }
