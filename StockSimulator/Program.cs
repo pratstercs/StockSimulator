@@ -10,16 +10,16 @@ namespace StockSimulator
 
         static void Main(string[] args)
         {
+#if DEBUG
             //Debug test code
-            
+
             TestClass tc = new TestClass(new GameLogic());
 
             tc.testSell();
 
             Console.WriteLine("Test Finished");
             Console.In.Read();
-            
-
+#endif
             //Actual program operation
             /*
             ConsoleMenu menu = new ConsoleMenu();
@@ -95,6 +95,7 @@ namespace StockSimulator
         
     }
 
+#if DEBUG
     class TestClass
     {
         GameLogic gl;
@@ -208,7 +209,13 @@ namespace StockSimulator
 
             Console.WriteLine(gl.cash);
         }
+
+        public void testDate()
+        {
+
+        }
     }
+#endif
 
     class GameMenu {
 
