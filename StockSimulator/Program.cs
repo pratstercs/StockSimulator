@@ -12,10 +12,9 @@ namespace StockSimulator
         {
 #if DEBUG
             //Debug test code
-
             TestClass tc = new TestClass(new GameLogic());
 
-            tc.testSell();
+            tc.testRandom();
 
             Console.WriteLine("Test Finished");
             Console.In.Read();
@@ -91,8 +90,6 @@ namespace StockSimulator
             TestClass tc = new TestClass(gl);
             tc.testBuying();
         }
-
-        
     }
 
 #if DEBUG
@@ -213,6 +210,17 @@ namespace StockSimulator
         public void testDate()
         {
 
+        }
+
+        public void testRandom()
+        {
+            //string json = WebInterface.queryAPI("JPM", "2015-02-18", "2015-02-18");
+            //Utilities.arrayify("JPM", json, gl.ex);
+            decimal[] array = Utilities.generatePrices(58.84M, 57.25M, 58.86M, 57.81M);
+            foreach (decimal d in array)
+            {
+                Console.WriteLine(d);
+            }
         }
     }
 #endif

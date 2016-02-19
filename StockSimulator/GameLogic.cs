@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 //TODO: Handle weekends - use next day's data? Or just don't allow?
 //TODO: ensure date is a working day - i.e. has data
 //TODO: handle bank holidays - days where data is missing
+//TODO: expand to hourly, rather than daily. Use Utilties.generatePrices
 
 namespace StockSimulator
 {
@@ -254,6 +255,33 @@ namespace StockSimulator
                 default:
                     return 1;
             }
+        }
+
+        /// <summary>
+        /// Generates random but realistic prices for a day's trading based on the open & close, high & low prices
+        /// </summary>
+        /// <param name="open">The day's starting price</param>
+        /// <param name="low">The day's lowest price, here used as a minimum for Random</param>
+        /// <param name="high">The day's highest price, here used as a maximum</param>
+        /// <param name="close">The day's ending price</param>
+        /// <returns>A decimal array for the generated hourly prices</returns>
+        public static decimal[] generatePrices(decimal open, decimal low, decimal high, decimal close)
+        {
+            Random r = new Random();
+            int bottom = Convert.ToInt32(low * 100); //decimal to int for random.next()
+            int top = Convert.ToInt32(high * 100);
+
+            decimal[] prices = new decimal[9]; //9am-5pm
+            prices[0] = open; //setting the two set prices of the day
+            prices[8] = close;
+            for (int i = 1; i < 8; i++)
+            {
+                decimal random = r.Next(bottom, top); //generate random price (int, x100) between the day's high and low
+                decimal price = (random / 100); //get the random price as a decimal and in the right order of magnitude
+                prices[i] = price; //set that hour's price
+            }
+
+            return prices;
         }
     }
 
