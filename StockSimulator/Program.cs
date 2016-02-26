@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 
 namespace StockSimulator
 {
@@ -14,7 +15,7 @@ namespace StockSimulator
             //Debug test code
             TestClass tc = new TestClass(new GameLogic());
 
-            tc.testRandom();
+            tc.testIncrementHour();
 
             Console.WriteLine("Test Finished");
             Console.In.Read();
@@ -226,6 +227,17 @@ namespace StockSimulator
             foreach (decimal d in array)
             {
                 Console.WriteLine(d);
+            }
+        }
+
+        public void testIncrementHour()
+        {
+            GameLogic gl = new GameLogic(new Exchange(), DateTime.Now);
+            while(true)
+            {
+                Console.WriteLine(gl.currentDate.ToString());
+                gl.incrementTime();
+                Thread.Sleep(1500);
             }
         }
     }

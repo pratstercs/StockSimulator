@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 //TODO: Handle weekends - use next day's data? Or just don't allow?
 //TODO: ensure date is a working day - i.e. has data
 //TODO: handle bank holidays - days where data is missing
-//TODO: expand to hourly, rather than daily. Use Utilties.generatePrices
+//TODO: expand to hourly, rather than daily. Use Utilties.generatePrices, the returned decimal array
 
 namespace StockSimulator
 {
@@ -31,6 +31,7 @@ namespace StockSimulator
         /// <param name="time">The date on which to start the scenario</param>
         public GameLogic(Exchange e, DateTime time)
         {
+            currentDate = time;
             ex = e;
         }
 
@@ -146,12 +147,14 @@ namespace StockSimulator
         }
 
         /// <summary>
-        /// Method to increment the date to the next working day
+        /// Method to increment the time to the next working hour
         /// </summary>
-        public void incrementDate()
+        public void incrementTime()
         {
-            int daysToIncrement = Utilities.testWorkingDay(currentDate);
-            currentDate.AddDays(daysToIncrement);
+            int hoursToIncrement = Utilities.testWorkingDay(currentDate);
+            currentDate = currentDate.AddHours(hoursToIncrement);
+            currentDate = currentDate.AddMinutes(-currentDate.Minute);
+            currentDate = currentDate.AddSeconds(-currentDate.Second);
         }
     }
 
@@ -244,16 +247,29 @@ namespace StockSimulator
         public static int testWorkingDay(DateTime date)
         {
             DayOfWeek day = date.DayOfWeek;
+            int hour = date.Hour;
 
-            switch(day)
+            if(hour >= 9 && hour < 16)
             {
-                case DayOfWeek.Friday:
-                    return 3;
-                case DayOfWeek.Saturday:
-                    return 2;
-                case DayOfWeek.Sunday:
-                default:
-                    return 1;
+                return 1;
+            }
+            else if(hour >= 16)
+            {
+                switch (day)
+                {
+                    case DayOfWeek.Friday:
+                        return (24 + 24 + 17);
+                    case DayOfWeek.Saturday:
+                        return (24 + 17);
+                    case DayOfWeek.Sunday:
+                    default:
+                        return 17;
+                }
+            }
+            else
+            {
+                //before 9am
+                return (9 - hour);
             }
         }
 
