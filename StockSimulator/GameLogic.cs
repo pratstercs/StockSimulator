@@ -5,8 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 
-//TODO: Handle weekends - use next day's data? Or just don't allow?
-//TODO: ensure date is a working day - i.e. has data
+//TODO: ensure date is a working day - i.e. has data (NullPointer try/catch?)
 //TODO: handle bank holidays - days where data is missing
 //TODO: expand to hourly, rather than daily. Use Utilties.generatePrices, the returned decimal array
 
