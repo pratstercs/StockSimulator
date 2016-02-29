@@ -46,7 +46,7 @@ namespace StockSimulator
             StockRow sr = ex[symbol][date];
 
             decimal totalCost = sr.close * amount; //close? not open?
-            if(cash < totalCost || amount > sr.volume) //totalCost is more than available cash or amount wanting to purchase is greater than volume available
+            if (cash < totalCost || amount > sr.volume) //totalCost is more than available cash or amount wanting to purchase is greater than volume available
             {
                 return false;
             }
@@ -76,11 +76,11 @@ namespace StockSimulator
         /// <returns>Bool whether the sale completed successfully</returns>
         public bool sellStock(DateTime date, string symbol, int amount)
         {
-            IOrderedEnumerable<Stock> currentStocks = from entry in wallet where entry.symbol==symbol orderby entry.amount ascending select entry; //extract matching stocks from wallet
+            IOrderedEnumerable<Stock> currentStocks = from entry in wallet where entry.symbol == symbol orderby entry.amount ascending select entry; //extract matching stocks from wallet
 
             int amountHeld = 0;
 
-            foreach(Stock s in currentStocks)
+            foreach (Stock s in currentStocks)
             {
                 amountHeld += s.amount;
             }
@@ -131,7 +131,7 @@ namespace StockSimulator
             decimal totalCost = 0;
             decimal currentPrice = 0;
 
-            foreach(Stock purchase in wallet)
+            foreach (Stock purchase in wallet)
             {
                 currentPrice += (ex[purchase.symbol][date].close * purchase.amount);
                 totalCost += (purchase.purchasePrice * purchase.amount);
@@ -248,11 +248,11 @@ namespace StockSimulator
             DayOfWeek day = date.DayOfWeek;
             int hour = date.Hour;
 
-            if(hour >= 9 && hour < 16)
+            if (hour >= 9 && hour < 16)
             {
                 return 1;
             }
-            else if(hour >= 16)
+            else if (hour >= 16)
             {
                 switch (day)
                 {
