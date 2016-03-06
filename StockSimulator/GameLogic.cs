@@ -16,7 +16,17 @@ namespace StockSimulator
         public Exchange ex; //TODO: make private with accessors
         public List<Stock> wallet = new List<Stock>(); //TODO: make private with accessors
         public decimal cash; //TODO: make private
-        public DateTime currentDate;
+
+        public DateTime currentDate
+        {
+            get { return currentDate; }
+            set
+            {
+                currentDate = value;
+                //if currentDate == "new day"
+                // then update ticker with new data?
+            }
+        }
 
         public GameLogic()
         {
