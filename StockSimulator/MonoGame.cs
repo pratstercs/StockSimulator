@@ -11,6 +11,7 @@ namespace StockSimulator
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Texture2D t;
 
         public MonoGame()
         {
@@ -39,7 +40,8 @@ namespace StockSimulator
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            t = new Texture2D(GraphicsDevice, 1,1);
+            t.SetData<Color>(new Color[] { Color.Red });
             // TODO: use this.Content to load your game content here
         }
 
@@ -73,11 +75,36 @@ namespace StockSimulator
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
+            spriteBatch.Begin();
+            DrawLine(t, new Vector2(200, 200), new Vector2(100, 50));
+            spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        void DrawLine(Texture2D texture,Vector2 start, Vector2 end)
+        {
+            Vector2 edge = end - start;
+            // calculate angle to rotate line
+            float angle =
+                (float)System.Math.Atan2(edge.Y, edge.X);
+
+
+            spriteBatch.Draw(t,
+                new Rectangle(// rectangle defines shape of line and position of start of line
+                    (int)start.X,
+                    (int)start.Y,
+                    (int)edge.Length(), //sb will strech the texture to fill this rectangle
+                    1), //width of line, change this to make thicker line
+                null,
+                Color.Red, //colour of line
+                angle,     //angle of line (calulated above)
+                new Vector2(0, 0), // point in line about which to rotate
+                SpriteEffects.None,
+                0);
         }
     }
 }
