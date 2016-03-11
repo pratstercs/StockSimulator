@@ -11,7 +11,7 @@ namespace StockSimulator
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Texture2D t;
+        //Texture2D t;
 
         public MonoGame()
         {
@@ -45,8 +45,6 @@ namespace StockSimulator
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            t = new Texture2D(GraphicsDevice, 1, 1);
-            //t.SetData<Color>(new Color[] { Color.Red });
 
             // TODO: use this.Content to load your game content here
         }
@@ -87,8 +85,11 @@ namespace StockSimulator
             spriteBatch.Begin();
 
             decimal[] data = { 53.91M, 57.57M, 58.6M, 59.25M, 58.86M, 58.17M, 58.88M, 58.09M, 56.21M, 57.03M, 58.11M, 57.605M, 59.2M, 59.9M, 59.96M, 60.55M, 60.05M, 59.5M, 59.54M, 59.67M };
+            decimal[] data2 = { 57.03M, 58.11M, 57.605M, 59.2M, 59.9M, 59.96M, 60.55M, 60.05M, 59.5M, 59.54M, 59.67M, 53.91M, 57.57M, 58.6M, 59.25M, 58.86M, 58.17M, 58.88M, 58.09M, 56.21M };
             Vector2[] points = Utilities.pointMaker(data, 600, 800, 0, 0);
-            Graphing.drawGraph(t, spriteBatch, Color.Lime, points);
+            Vector2[] points2 = Utilities.pointMaker(data2, 600, 800, 0, 0);
+            Graphing.drawGraph(new Texture2D(GraphicsDevice, 1, 1), spriteBatch, Color.Lime, points);
+            Graphing.drawGraph(new Texture2D(GraphicsDevice, 1, 1), spriteBatch, Color.Red, points2);
             spriteBatch.End();
 
             base.Draw(gameTime);

@@ -166,6 +166,16 @@ namespace StockSimulator
             currentDate = currentDate.AddMinutes(-currentDate.Minute);
             currentDate = currentDate.AddSeconds(-currentDate.Second);
         }
+
+        public Vector2[] graphStock(string symbol, DateTime start, DateTime end)
+        {
+            int points = (start - end).Duration().Hours; //get number of datapoints available
+            Vector2[] toReturn = new Vector2[points];
+            
+            //get each datapoint from Exchange to toReturn
+
+            return toReturn;
+        }
     }
 
     /// <summary>
