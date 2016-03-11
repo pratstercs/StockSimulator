@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using Microsoft.Xna.Framework;
 
 //TODO: ensure date is a working day - i.e. has data (NullPointer try/catch?)
 //TODO: handle bank holidays - days where data is missing
@@ -307,6 +308,41 @@ namespace StockSimulator
             }
 
             return prices;
+        }
+
+        /// <summary>
+        /// Method to transform decimal stock prices into co-ordinates for graphing
+        /// </summary>
+        /// <param name="data">The data array to graph</param>
+        /// <param name="height">The height of the graph area</param>
+        /// <param name="width">The width of the graph area</param>
+        /// <param name="Xstart">The X co-ordinate of the graph origin</param>
+        /// <param name="Ystart">The Y co-ordinate of the graph origin</param>
+        /// <returns>An array of co-ordinates of the graph points</returns>
+        public static Vector2[] pointMaker(decimal[] data, float height, float width, int Xstart, int Ystart)
+        {
+            Vector2[] toReturn = new Vector2[data.Length];
+
+            float[] floats = Array.ConvertAll(data, x => (float)x);
+
+            float max = (float)data.Max();
+            float min = (float)data.Min();
+
+            int space = (int) Math.Round(width / data.Length); //get horizontal spacing between points
+
+            for(int i = 0; i < floats.Length; i++)
+            {
+                floats[i] -= min; //remove minimum from all values
+                floats[i] /= (max - min); //divide all by converted max to get percentage of graph height
+                floats[i] *= height; //multiply by graph height to get relative heights
+                floats[i] += Xstart; //add graph start offset
+
+                toReturn[i] = new Vector2(
+                    Ystart + (space * i), //start of graph + spacing for each point
+                    floats[i]); //the proper height
+            }
+
+            return toReturn;
         }
     }
 
