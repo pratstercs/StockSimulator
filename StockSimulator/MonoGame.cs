@@ -9,12 +9,16 @@ namespace StockSimulator
     /// </summary>
     public class MonoGame : Game
     {
+        GameLogic gl;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         //Texture2D t;
 
         public MonoGame()
         {
+            gl = new GameLogic();
+            gl.getData("JPM", "20150101", "20160101");
+
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             graphics.PreferredBackBufferWidth = 800;  // set this value to the desired width of your window
@@ -84,12 +88,13 @@ namespace StockSimulator
             // TODO: Add your drawing code here
             spriteBatch.Begin();
 
-            decimal[] data = { 53.91M, 57.57M, 58.6M, 59.25M, 58.86M, 58.17M, 58.88M, 58.09M, 56.21M, 57.03M, 58.11M, 57.605M, 59.2M, 59.9M, 59.96M, 60.55M, 60.05M, 59.5M, 59.54M, 59.67M };
-            decimal[] data2 = { 57.03M, 58.11M, 57.605M, 59.2M, 59.9M, 59.96M, 60.55M, 60.05M, 59.5M, 59.54M, 59.67M, 53.91M, 57.57M, 58.6M, 59.25M, 58.86M, 58.17M, 58.88M, 58.09M, 56.21M };
-            Vector2[] points = Utilities.pointMaker(data, 600, 800, 0, 0);
-            Vector2[] points2 = Utilities.pointMaker(data2, 600, 800, 0, 0);
-            Graphing.drawGraph(new Texture2D(GraphicsDevice, 1, 1), spriteBatch, Color.Lime, points);
-            Graphing.drawGraph(new Texture2D(GraphicsDevice, 1, 1), spriteBatch, Color.Red, points2);
+            decimal[][] data = gl.getStockDataByDay("JPM", new System.DateTime(2015, 1, 1), new System.DateTime(2016, 1, 1));
+            
+            for(int i = 0; i < 4; i++)
+            {
+                Vector2[] points = Utilities.pointMaker(data[i], 600, 800, 0, 0);
+                Graphing.drawGraph(new Texture2D(GraphicsDevice, 1, 1), spriteBatch, Color.Lime, points);
+            }
             spriteBatch.End();
 
             base.Draw(gameTime);

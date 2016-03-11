@@ -45,6 +45,21 @@ namespace StockSimulator
             ex = e;
         }
 
+        public bool getData(string symbol, string startDate, string endDate)
+        {
+            try
+            {
+                string response = WebInterface.queryAPI(symbol, startDate, endDate);
+                Utilities.arrayify(symbol, response, ex);
+                return true;
+            }
+            catch (WebException e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+
         /// <summary>
         /// Method to buy stocks from the exchange and add to the user's wallet
         /// </summary>
@@ -167,12 +182,28 @@ namespace StockSimulator
             currentDate = currentDate.AddSeconds(-currentDate.Second);
         }
 
-        public Vector2[] graphStock(string symbol, DateTime start, DateTime end)
+        public decimal[][] getStockDataByDay(string symbol, DateTime start, DateTime end)
         {
             int points = (start - end).Duration().Hours; //get number of datapoints available
-            Vector2[] toReturn = new Vector2[points];
-            
-            //get each datapoint from Exchange to toReturn
+            decimal[][] toReturn = new decimal[4][]; //open,high,low,close
+            for(int x = 0; x < 4; x++)
+            {
+                toReturn[x] = new decimal[points];
+            }
+
+            var values = ex[symbol].Where(x => x.Key > start && x.Key < end); //get data from exchange between the two DateTimes
+
+            int i = 0;
+            foreach(var x in values)
+            {
+                //throwing OutOfBounds here
+                toReturn[0][i] = x.Value.open; //get each data stream to its own array
+                toReturn[1][i] = x.Value.high;
+                toReturn[2][i] = x.Value.low;
+                toReturn[3][i] = x.Value.close;
+
+                i++;
+            }
 
             return toReturn;
         }
