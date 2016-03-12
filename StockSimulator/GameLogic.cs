@@ -182,21 +182,27 @@ namespace StockSimulator
             currentDate = currentDate.AddSeconds(-currentDate.Second);
         }
 
+        /// <summary>
+        /// Method to get a 2D decimal array for all the stock prices in a specified range
+        /// </summary>
+        /// <param name="symbol">The symbol for the data to extract</param>
+        /// <param name="start">The DateTime of the start point</param>
+        /// <param name="end">The DateTime of the end point</param>
+        /// <returns>A 2D decimal array (rows: open, high, low, close) of the prices</returns>
         public decimal[][] getStockDataByDay(string symbol, DateTime start, DateTime end)
         {
-            int points = (start - end).Duration().Hours; //get number of datapoints available
+            //TODO: Add code to generate inter-day data?
+            var values = from entry in ex[symbol] where (entry.Key > start && entry.Key < end) select entry; //get values from the ticker within the specified range
+
             decimal[][] toReturn = new decimal[4][]; //open,high,low,close
             for(int x = 0; x < 4; x++)
             {
-                toReturn[x] = new decimal[points];
+                toReturn[x] = new decimal[values.Count()]; //make the correct number of array spaces
             }
-
-            var values = ex[symbol].Where(x => x.Key > start && x.Key < end); //get data from exchange between the two DateTimes
 
             int i = 0;
             foreach(var x in values)
             {
-                //throwing OutOfBounds here
                 toReturn[0][i] = x.Value.open; //get each data stream to its own array
                 toReturn[1][i] = x.Value.high;
                 toReturn[2][i] = x.Value.low;
@@ -364,12 +370,12 @@ namespace StockSimulator
         {
             Vector2[] toReturn = new Vector2[data.Length];
 
-            float[] floats = Array.ConvertAll(data, x => (float)x);
+            float[] floats = Array.ConvertAll(data, x => (float)x); //convert decimals to floats
 
-            float max = (float)data.Max();
-            float min = (float)data.Min();
+            float max = floats.Max();
+            float min = floats.Min();
 
-            int space = (int) Math.Round(width / data.Length); //get horizontal spacing between points
+            int space = (int) (width / (double)data.Length); //get horizontal spacing between points
 
             for(int i = 0; i < floats.Length; i++)
             {
