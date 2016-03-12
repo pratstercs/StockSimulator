@@ -89,11 +89,12 @@ namespace StockSimulator
             spriteBatch.Begin();
 
             decimal[][] data = gl.getStockDataByDay("JPM", new System.DateTime(2015, 1, 1), new System.DateTime(2016, 1, 1));
-            
+            Color[] colours = { Color.Yellow, Color.Blue, Color.Lime, Color.OrangeRed };
+
             for(int i = 0; i < 4; i++)
             {
                 Vector2[] points = Utilities.pointMaker(data[i], 600, 800, 0, 0);
-                Graphing.drawGraph(new Texture2D(GraphicsDevice, 1, 1), spriteBatch, Color.Lime, points);
+                Graphing.drawGraph(new Texture2D(GraphicsDevice, 1, 1), spriteBatch, colours[i], points);
             }
             spriteBatch.End();
 
