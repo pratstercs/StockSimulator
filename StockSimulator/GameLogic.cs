@@ -213,7 +213,31 @@ namespace StockSimulator
 
             return toReturn;
         }
+
+        /// <summary>
+        /// Method to get a 2D decimal array for all the stock prices in a specified range
+        /// </summary>
+        /// <param name="symbol">The symbol for the data to extract</param>
+        /// <param name="start">The DateTime of the start point</param>
+        /// <param name="end">The DateTime of the end point</param>
+        /// <returns>A DateTime array with each element's date</returns>
+        public DateTime[] getStockDates(string symbol, DateTime start, DateTime end)
+        {
+            var values = from entry in ex[symbol] where (entry.Key > start && entry.Key < end) select entry; //get values from the ticker within the specified range
+   
+            DateTime[] toReturn = new DateTime[values.Count()];
+
+            int i = 0;
+            foreach (var x in values)
+            {
+                toReturn[i] = x.Key;
+                i++;
+            }
+
+            return toReturn;
+        }
     }
+    
 
     /// <summary>
     /// Static class to store misc static methods
@@ -355,6 +379,53 @@ namespace StockSimulator
             }
 
             return prices;
+        }
+
+        /// <summary>
+        /// Get the maximum and minimum values of a 2D array
+        /// </summary>
+        /// <param name="data">The 2D array to work with</param>
+        /// <returns>The maximum and minimum values (in that order) of the array</returns>
+        public static decimal[] getExtremes(decimal[][] data)
+        {
+            decimal[] toReturn = new decimal[2];
+
+            toReturn[0] = Decimal.MinValue;
+            toReturn[1] = Decimal.MaxValue;
+
+            foreach (decimal[] d in data)
+            {
+                if (d.Max() > toReturn[0])
+                {
+                    toReturn[0] = d.Max();
+                }
+                if (d.Min() < toReturn[1])
+                {
+                    toReturn[1] = d.Min();
+                }
+            }
+
+            return toReturn;
+        }
+
+        public static string[,] axisLabeller(decimal[][] data)
+        {
+            string[,] toReturn = new string[2, 10];
+
+            //get max and min across arrays
+            decimal[] extremes = getExtremes(data);
+
+            //left axis labels
+            decimal spacing = ((extremes[0] - extremes[1]) / 10); //10 labels on the vertical axis, so each one 1/10 of the way up
+            for(int i = 0; i < 10; i++)
+            {
+                decimal value = extremes[1] + (i * spacing); //minimum + i tenths of the difference
+                toReturn[0, i] = value.ToString();
+            }
+
+            //bottom axis labels
+
+            return toReturn;
         }
     }
 
