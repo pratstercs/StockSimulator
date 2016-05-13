@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-//using Microsoft.Xna.Framework;
 
 //TODO: ensure date is a working day - i.e. has data (NullPointer try/catch?)
 //TODO: handle bank holidays - days where data is missing
@@ -399,7 +398,12 @@ namespace StockSimulator
             return toReturn;
         }
 
-        /// TODO: comment
+        /// <summary>
+        /// Method to generate the axis labels for a stock graph
+        /// </summary>
+        /// <param name="data">The stock prices of the graph</param>
+        /// <param name="dates">The dates of the stock prices used</param>
+        /// <returns>A 2D string array containing the vertical price labels [0][i] and the horizontal date labels [1][i]</returns>
         public static string[][] axisLabeller(decimal[][] data, DateTime[] dates)
         {
             string[][] toReturn = new string[2][];
