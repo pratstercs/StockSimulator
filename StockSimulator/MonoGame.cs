@@ -106,19 +106,23 @@ namespace StockSimulator
             // TODO: Add your drawing code here
             spriteBatch.Begin();
 
-            decimal[][] data = gl.getStockDataByDay("JPM", new System.DateTime(2015, 1, 1), new System.DateTime(2016, 1, 1));
+            System.DateTime start = new System.DateTime(2015, 1, 1);
+            System.DateTime end = new System.DateTime(2016, 1, 1);
+            System.DateTime[] dates = gl.getStockDates("JPM", start, end);
+
+            decimal[][] data = gl.getStockDataByDay("JPM", start, end);
             Color[] colours = { Color.Yellow, Color.Blue, Color.Lime, Color.OrangeRed };
 
-            float[] values = Graphing.initialiseGraph(spriteBatch, data, 600, 800, 0, 0); //draw basics of graph and calculate actual plot area excluding margins, etc
+            Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
+
+            float[] values = Graphing.initialiseGraph(spriteBatch, t, font, data, dates, 600, 800, 0, 0); //draw basics of graph and calculate actual plot area excluding margins, etc
 
             for(int i = 0; i < 4; i++)
             {
                 Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], (int)values[2], (int)values[3], values[4], values[5]);
                 //Vector2[] points = Graphing.pointMaker(data[i], 600, 800, 0, 0);
-                Graphing.drawGraph(new Texture2D(GraphicsDevice, 1, 1), spriteBatch, colours[i], points);
+                Graphing.drawGraph(t, spriteBatch, colours[i], points);
             }
-
-            DrawString(spriteBatch, font, "Test", new Vector2(100, 100), Color.Black, -45);
 
             spriteBatch.End();
 
@@ -189,16 +193,11 @@ namespace StockSimulator
         /// <param name="Xstart">The X co-ordinate of the graph origin</param>
         /// <param name="Ystart">The Y co-ordinate of the graph origin</param>
         /// <returns>An array of co-ordinates of the graph points</returns>
-        public static Vector2[] pointMaker(decimal[] data, float height, float width, int Xstart, int Ystart, float max, float min)
+        public static Vector2[] pointMaker(decimal[] data, float height, float width, float Xstart, float Ystart, float max, float min)
         {
             Vector2[] toReturn = new Vector2[data.Length]; //create array of vectors to store points in
 
             float[] floats = System.Array.ConvertAll(data, x => (float)x); //convert decimals to floats
-
-            //float max = floats.Max(); //get the maximum value
-            //float min = floats.Min(); //get the minimum value
-
-            height *= 0.95f; //set graph to use 95% of the vertical space to add padding
 
             float space = (float)(width / (double)data.Length); //get horizontal spacing between points
 
@@ -208,29 +207,99 @@ namespace StockSimulator
                 floats[i] /= (max - min); //divide all by converted max to get percentage of graph height
                 floats[i] *= height; //multiply by graph height to get relative heights
                 floats[i] = height - floats[i]; //flip graph (pixel numbering 0,0 is top left)
-                floats[i] += Xstart + (height * 0.025f); //add graph start offset and add vertical padding
+                //floats[i] -= Ystart; //add graph start offset and add vertical padding
 
                 toReturn[i] = new Vector2(
-                    Ystart + (space * i), //start of graph + spacing for each point
+                    Xstart + (space * i), //start of graph + spacing for each point
                     floats[i]); //the proper height
             }
 
             return toReturn;
         }
 
-        public static float[] initialiseGraph(SpriteBatch sb, decimal[][] data, float height, float width, int Xstart, int Ystart)
+        public static float[] initialiseGraph(SpriteBatch sb, Texture2D t, SpriteFont font, decimal[][] data, System.DateTime[] dates, float height, float width, float Xstart, float Ystart)
         {
-            //vertical axis labels
+            string[][] labels = Utilities.axisLabeller(data, dates);
+            decimal[] extremes = Utilities.getExtremes(data);
 
-            //horizontal axis labels
+            int maxLeftWidth = (int)labels[0].Max(x => font.MeasureString(x).X); //get length of longest string
+            int maxBottomHeight = labels[1].Max(x => pythagoreanShite(font.MeasureString(x))); //get length of longest string
 
-            //draw horizontal margins
+            float graphWidth = width - maxLeftWidth; //width of plot area (minus left label width)
+            float graphHeight = height - maxBottomHeight; //height of plot area (minus bottom label height)
 
-            //draw vertical margins
-            //draw midpoints
-            //float[] toReturn = new float[5];
-            float[] toReturn = { 600f, 800f, 0f, 0f, 0f, 0f};
+            float[] toReturn = { graphHeight, graphWidth, width - graphWidth, height - graphHeight, (float)extremes[1], (float)extremes[0] };
+
+            //drawMainMargins(sb, t, height, width, Xstart, Ystart);
+            drawMinorMargins(sb, t, graphHeight, graphWidth, Xstart + maxLeftWidth, Ystart);
+            drawGridlines(sb, t, graphHeight, Xstart + maxLeftWidth, Ystart, Xstart + width);
+
+            drawLeftAxisLabels(sb, font, labels[0], graphHeight, Xstart, height-maxBottomHeight);
+            drawBottomAxisLabels(sb, font, labels[1], graphWidth, height, (Xstart+maxLeftWidth));
+
             return toReturn;
+        }
+
+        private static void drawMainMargins(SpriteBatch sb, Texture2D t, float height, float width, float Xstart, float Ystart)
+        {
+            Vector2 origin = new Vector2(Xstart, Ystart + height);
+            Vector2 leftTop = new Vector2(Xstart, Ystart);
+            Vector2 rightTop = new Vector2(Xstart + width, Ystart);
+            Vector2 rightBottom = new Vector2(Xstart + width, Ystart + height);
+
+            drawLine(t, sb, Color.Black, origin, leftTop, 5);
+            drawLine(t, sb, Color.Black, leftTop, rightTop, 5);
+            drawLine(t, sb, Color.Black, rightTop, rightBottom, 5);
+            drawLine(t, sb, Color.Black, rightBottom, origin, 5);
+        }
+
+        private static void drawMinorMargins(SpriteBatch sb, Texture2D t, float height, float width, float Xstart, float Ystart)
+        {
+            Vector2 origin = new Vector2(Xstart, Ystart + height);
+            Vector2 leftTop = new Vector2(Xstart, Ystart);
+            Vector2 rightTop = new Vector2(Xstart + width, Ystart);
+            Vector2 rightBottom = new Vector2(Xstart + width, Ystart + height);
+
+            drawLine(t, sb, Color.Black, origin, leftTop, 2);
+            drawLine(t, sb, Color.Black, leftTop, rightTop, 2);
+            drawLine(t, sb, Color.Black, rightTop, rightBottom, 2);
+            drawLine(t, sb, Color.Black, rightBottom, origin, 2);
+        }
+
+        private static void drawGridlines(SpriteBatch sb, Texture2D t, float height, float Xstart, float Ystart, float rightEdge)
+        {
+            float spacing = height / 4;
+
+            for(int i = 1; i < 4; i++)
+            {
+                float yPos = Ystart + (i * spacing);
+                drawLine(t, sb, Color.Gray, new Vector2(Xstart, yPos), new Vector2(rightEdge, yPos), 2);
+            }
+        }
+
+        private static void drawLeftAxisLabels(SpriteBatch sb, SpriteFont font, string[] labels, float height, float Xstart, float Ystart)
+        {
+            float spacing = height / 10;
+
+            for(int i = 0; i < 11; i++)
+            {
+                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart, (Ystart - (spacing * i))), Color.Black, 0);
+            }
+        }
+
+        private static void drawBottomAxisLabels(SpriteBatch sb, SpriteFont font, string[] labels, float width, float height, float Xstart)
+        {
+            float spacing = width / 10;
+
+            for (int i = 0; i < 11; i++)
+            {
+                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart + (spacing * i), height), Color.Black, -45);
+            }
+        }
+
+        private static int pythagoreanShite(Vector2 v)
+        {
+            return (int)System.Math.Sqrt(System.Math.Pow(v.X,2) + System.Math.Pow(v.Y, 2));
         }
     }
 }
