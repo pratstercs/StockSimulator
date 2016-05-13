@@ -23,8 +23,8 @@ namespace StockSimulator
 
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            graphics.PreferredBackBufferWidth = 800;  // set this value to the desired width of your window
-            graphics.PreferredBackBufferHeight = 600;   // set this value to the desired height of your window
+            graphics.PreferredBackBufferWidth = 1366;  // set this value to the desired width of your window
+            graphics.PreferredBackBufferHeight = 768;   // set this value to the desired height of your window
             this.Window.Title = "StockSimulator";
 
             graphics.ApplyChanges();
@@ -115,12 +115,11 @@ namespace StockSimulator
 
             Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
 
-            float[] values = Graphing.initialiseGraph(spriteBatch, t, font, data, dates, 600, 800, 0, 0); //draw basics of graph and calculate actual plot area excluding margins, etc
+            float[] values = Graphing.initialiseGraph(spriteBatch, t, font, data, dates, 768, 1366, 0, 0); //draw basics of graph and calculate actual plot area excluding margins, etc
 
             for(int i = 0; i < 4; i++)
             {
                 Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], (int)values[2], (int)values[3], values[4], values[5]);
-                //Vector2[] points = Graphing.pointMaker(data[i], 600, 800, 0, 0);
                 Graphing.drawGraph(t, spriteBatch, colours[i], points);
             }
 
@@ -206,8 +205,7 @@ namespace StockSimulator
                 floats[i] -= min; //remove minimum from all values
                 floats[i] /= (max - min); //divide all by converted max to get percentage of graph height
                 floats[i] *= height; //multiply by graph height to get relative heights
-                floats[i] = height - floats[i]; //flip graph (pixel numbering 0,0 is top left)
-                //floats[i] -= Ystart; //add graph start offset and add vertical padding
+                floats[i] = floats[i]; //flip graph (pixel numbering 0,0 is top left)
 
                 toReturn[i] = new Vector2(
                     Xstart + (space * i), //start of graph + spacing for each point
@@ -217,6 +215,19 @@ namespace StockSimulator
             return toReturn;
         }
 
+        /// <summary>
+        /// Method to draw the basics of the graph, such as gridlines and axis labels. Also calculates offsets and graph area co-ordinates
+        /// </summary>
+        /// <param name="sb">The SpriteBatch to use</param>
+        /// <param name="t">The Texture2D object to use to draw the lines</param>
+        /// <param name="font">The predefined font to use</param>
+        /// <param name="data">The 2D decimal array containing all the stock data to graph</param>
+        /// <param name="dates">The DateTime array containing the dates to form the bottom axis labels</param>
+        /// <param name="height">The graph area height</param>
+        /// <param name="width">The graph area width</param>
+        /// <param name="Xstart">The x co-ordinate to start from</param>
+        /// <param name="Ystart">The y co-ordinate to start from</param>
+        /// <returns>A float array containing the graph area height, width, x-offset, y-offset, data max point, data min point</returns>
         public static float[] initialiseGraph(SpriteBatch sb, Texture2D t, SpriteFont font, decimal[][] data, System.DateTime[] dates, float height, float width, float Xstart, float Ystart)
         {
             string[][] labels = Utilities.axisLabeller(data, dates);
@@ -240,6 +251,15 @@ namespace StockSimulator
             return toReturn;
         }
 
+        /// <summary>
+        /// Method to draw the margins surrounding the whole graph area
+        /// </summary>
+        /// <param name="sb">The SpriteBatch to use</param>
+        /// <param name="t">The Texture2D object to use to draw the lines</param>
+        /// <param name="height">The graph area height</param>
+        /// <param name="width">The graph area width</param>
+        /// <param name="Xstart">The x co-ordinate to start from</param>
+        /// <param name="Ystart">The y co-ordinate to start from</param>
         private static void drawMainMargins(SpriteBatch sb, Texture2D t, float height, float width, float Xstart, float Ystart)
         {
             Vector2 origin = new Vector2(Xstart, Ystart + height);
@@ -253,6 +273,15 @@ namespace StockSimulator
             drawLine(t, sb, Color.Black, rightBottom, origin, 5);
         }
 
+        /// <summary>
+        /// Method to draw the axis lines
+        /// </summary>
+        /// <param name="sb">The SpriteBatch to use</param>
+        /// <param name="t">The Texture2D object to use to draw the lines</param>
+        /// <param name="height">The graph area height</param>
+        /// <param name="width">The graph area width</param>
+        /// <param name="Xstart">The x co-ordinate to start from</param>
+        /// <param name="Ystart">The y co-ordinate to start from</param>
         private static void drawMinorMargins(SpriteBatch sb, Texture2D t, float height, float width, float Xstart, float Ystart)
         {
             Vector2 origin = new Vector2(Xstart, Ystart + height);
@@ -266,6 +295,15 @@ namespace StockSimulator
             drawLine(t, sb, Color.Black, rightBottom, origin, 2);
         }
 
+        /// <summary>
+        /// Method to draw the grid lines every 1/4 of the graph area
+        /// </summary>
+        /// <param name="sb">The SpriteBatch to use</param>
+        /// <param name="t">The Texture2D object to use to draw the lines</param>
+        /// <param name="height">The graph area height</param>
+        /// <param name="Xstart">The x co-ordinate to start from</param>
+        /// <param name="Ystart">The y co-ordinate to start from</param>
+        /// <param name="rightEdge"></param>
         private static void drawGridlines(SpriteBatch sb, Texture2D t, float height, float Xstart, float Ystart, float rightEdge)
         {
             float spacing = height / 4;
@@ -277,6 +315,15 @@ namespace StockSimulator
             }
         }
 
+        /// <summary>
+        /// Method to draw the axis labels on the left hand side of a graph
+        /// </summary>
+        /// <param name="sb">The SpriteBatch to use</param>
+        /// <param name="font">The predefined font to use</param>
+        /// <param name="labels">The string array of the label text</param>
+        /// <param name="height">The graph area height</param>
+        /// <param name="Xstart">The x co-ordinate to start from</param>
+        /// <param name="Ystart">The y co-ordinate to start from</param>
         private static void drawLeftAxisLabels(SpriteBatch sb, SpriteFont font, string[] labels, float height, float Xstart, float Ystart)
         {
             float spacing = height / 10;
@@ -287,6 +334,15 @@ namespace StockSimulator
             }
         }
 
+        /// <summary>
+        /// Method to draw the axis labels on the bottom of a graph
+        /// </summary>
+        /// <param name="sb">The SpriteBatch to use</param>
+        /// <param name="font">The predefined font to use</param>
+        /// <param name="labels">The string array of the label text</param>
+        /// <param name="width">The graph area width</param>
+        /// <param name="height">The bottom of the graph area, aka, where to draw the labels</param>
+        /// <param name="Xstart">The x (horizontal) co-ord to start from</param>
         private static void drawBottomAxisLabels(SpriteBatch sb, SpriteFont font, string[] labels, float width, float height, float Xstart)
         {
             float spacing = width / 10;
@@ -297,6 +353,11 @@ namespace StockSimulator
             }
         }
 
+        /// <summary>
+        /// Text will be rotated -45°, so Pythagoras to the rescue to calculate the height!
+        /// </summary>
+        /// <param name="v">The text to calculate the rotated height of</param>
+        /// <returns>An int representing the height of the text should it be rotated</returns>
         private static int pythagoreanShite(Vector2 v)
         {
             return (int)System.Math.Sqrt(System.Math.Pow(v.X,2) + System.Math.Pow(v.Y, 2));
