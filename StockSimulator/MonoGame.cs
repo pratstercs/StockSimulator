@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Linq;
 
 namespace StockSimulator
 {
@@ -93,7 +94,7 @@ namespace StockSimulator
 
             for(int i = 0; i < 4; i++)
             {
-                Vector2[] points = Utilities.pointMaker(data[i], 600, 800, 0, 0);
+                Vector2[] points = Graphing.pointMaker(data[i], 600, 800, 0, 0);
                 Graphing.drawGraph(new Texture2D(GraphicsDevice, 1, 1), spriteBatch, colours[i], points);
             }
             spriteBatch.End();
@@ -152,6 +153,42 @@ namespace StockSimulator
                 drawLine(t, sb, color, prevPoint, point);
                 prevPoint = point;
             }
+        }
+
+        /// <summary>
+        /// Method to transform decimal stock prices into co-ordinates for graphing
+        /// </summary>
+        /// <param name="data">The data array to graph</param>
+        /// <param name="height">The height of the graph area</param>
+        /// <param name="width">The width of the graph area</param>
+        /// <param name="Xstart">The X co-ordinate of the graph origin</param>
+        /// <param name="Ystart">The Y co-ordinate of the graph origin</param>
+        /// <returns>An array of co-ordinates of the graph points</returns>
+        public static Vector2[] pointMaker(decimal[] data, float height, float width, int Xstart, int Ystart)
+        {
+            Vector2[] toReturn = new Vector2[data.Length];
+
+            float[] floats = System.Array.ConvertAll(data, x => (float)x); //convert decimals to floats
+
+            float max = floats.Max();
+            float min = floats.Min();
+
+            int space = (int)(width / (double)data.Length); //get horizontal spacing between points
+
+            for (int i = 0; i < floats.Length; i++)
+            {
+                floats[i] -= min; //remove minimum from all values
+                floats[i] /= (max - min); //divide all by converted max to get percentage of graph height
+                floats[i] *= height; //multiply by graph height to get relative heights
+                floats[i] = height - floats[i]; //flip graph (pixel numbering 0,0 is top left)
+                floats[i] += Xstart; //add graph start offset
+
+                toReturn[i] = new Vector2(
+                    Ystart + (space * i), //start of graph + spacing for each point
+                    floats[i]); //the proper height
+            }
+
+            return toReturn;
         }
     }
 }
