@@ -14,6 +14,7 @@ namespace StockSimulator
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         //Texture2D t;
+        SpriteFont font;
 
         public MonoGame()
         {
@@ -50,6 +51,7 @@ namespace StockSimulator
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            font = Content.Load<SpriteFont>("font");
 
             // TODO: use this.Content to load your game content here
         }
@@ -79,12 +81,27 @@ namespace StockSimulator
         }
 
         /// <summary>
+        /// Helper method for DrawString, using degrees instead of radians and ignoring unneeded parameters.
+        /// </summary>
+        /// <param name="sb">The SpriteBatch to use</param>
+        /// <param name="font">The predefined font to use</param>
+        /// <param name="text">The text to draw</param>
+        /// <param name="origin">The point to start the text</param>
+        /// <param name="color">The colour of the text</param>
+        /// <param name="degrees">The angle to rotate in degrees</param>
+        public static void DrawString(SpriteBatch sb, SpriteFont font, string text, Vector2 origin, Color color, int degrees)
+        {
+            float radians = (float)degrees * ((float)System.Math.PI / 180f);
+            sb.DrawString(font, text, origin, color, radians, new Vector2(0, 0), 1f, SpriteEffects.None, 1f);
+        }
+
+        /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Color.White);
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
@@ -92,11 +109,17 @@ namespace StockSimulator
             decimal[][] data = gl.getStockDataByDay("JPM", new System.DateTime(2015, 1, 1), new System.DateTime(2016, 1, 1));
             Color[] colours = { Color.Yellow, Color.Blue, Color.Lime, Color.OrangeRed };
 
+            float[] values = Graphing.initialiseGraph(spriteBatch, data, 600, 800, 0, 0); //draw basics of graph and calculate actual plot area excluding margins, etc
+
             for(int i = 0; i < 4; i++)
             {
-                Vector2[] points = Graphing.pointMaker(data[i], 600, 800, 0, 0);
+                Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], (int)values[2], (int)values[3], values[4], values[5]);
+                //Vector2[] points = Graphing.pointMaker(data[i], 600, 800, 0, 0);
                 Graphing.drawGraph(new Texture2D(GraphicsDevice, 1, 1), spriteBatch, colours[i], points);
             }
+
+            DrawString(spriteBatch, font, "Test", new Vector2(100, 100), Color.Black, -45);
+
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -113,7 +136,7 @@ namespace StockSimulator
         /// <param name="color">The line colour</param>
         /// <param name="start">The co-ordinates of the starting point</param>
         /// <param name="end">The co-ordinates of the ending point</param>
-        public static void drawLine(Texture2D t, SpriteBatch sb, Color color, Vector2 start, Vector2 end)
+        public static void drawLine(Texture2D t, SpriteBatch sb, Color color, Vector2 start, Vector2 end, int width)
         {
             t.SetData<Color>(new Color[] { color });
 
@@ -127,11 +150,11 @@ namespace StockSimulator
                 new Rectangle(// rectangle defines shape of line and position of start of line
                     (int)start.X,
                     (int)start.Y,
-                    (int)edge.Length(), //sb will strech the texture to fill this rectangle
-                    3), //width of line, change this to make thicker line
+                    (int)edge.Length(), //sprite will strech the texture to fill this rectangle
+                    width), //width of line
                 null,
                 color,
-                angle,     //angle of line (calulated above)
+                angle,     //angle of corner (calulated above)
                 new Vector2(0, 0), // point in line about which to rotate
                 SpriteEffects.None,
                 0);
@@ -146,11 +169,13 @@ namespace StockSimulator
         /// <param name="data">The co-ordinates of the points to graph</param>
         public static void drawGraph(Texture2D t, SpriteBatch sb, Color color, Vector2[] data)
         {
-            Vector2 prevPoint = new Vector2(data[0].X, data[0].Y);
+            Vector2 prevPoint = new Vector2(data[0].X, data[0].Y); //set initial "previous point" to the first point in the dataset
 
+
+            //draw each data line
             foreach (Vector2 point in data)
             {
-                drawLine(t, sb, color, prevPoint, point);
+                drawLine(t, sb, color, prevPoint, point, 3);
                 prevPoint = point;
             }
         }
@@ -164,16 +189,18 @@ namespace StockSimulator
         /// <param name="Xstart">The X co-ordinate of the graph origin</param>
         /// <param name="Ystart">The Y co-ordinate of the graph origin</param>
         /// <returns>An array of co-ordinates of the graph points</returns>
-        public static Vector2[] pointMaker(decimal[] data, float height, float width, int Xstart, int Ystart)
+        public static Vector2[] pointMaker(decimal[] data, float height, float width, int Xstart, int Ystart, float max, float min)
         {
-            Vector2[] toReturn = new Vector2[data.Length];
+            Vector2[] toReturn = new Vector2[data.Length]; //create array of vectors to store points in
 
             float[] floats = System.Array.ConvertAll(data, x => (float)x); //convert decimals to floats
 
-            float max = floats.Max();
-            float min = floats.Min();
+            //float max = floats.Max(); //get the maximum value
+            //float min = floats.Min(); //get the minimum value
 
-            int space = (int)(width / (double)data.Length); //get horizontal spacing between points
+            height *= 0.95f; //set graph to use 95% of the vertical space to add padding
+
+            float space = (float)(width / (double)data.Length); //get horizontal spacing between points
 
             for (int i = 0; i < floats.Length; i++)
             {
@@ -181,13 +208,28 @@ namespace StockSimulator
                 floats[i] /= (max - min); //divide all by converted max to get percentage of graph height
                 floats[i] *= height; //multiply by graph height to get relative heights
                 floats[i] = height - floats[i]; //flip graph (pixel numbering 0,0 is top left)
-                floats[i] += Xstart; //add graph start offset
+                floats[i] += Xstart + (height * 0.025f); //add graph start offset and add vertical padding
 
                 toReturn[i] = new Vector2(
                     Ystart + (space * i), //start of graph + spacing for each point
                     floats[i]); //the proper height
             }
 
+            return toReturn;
+        }
+
+        public static float[] initialiseGraph(SpriteBatch sb, decimal[][] data, float height, float width, int Xstart, int Ystart)
+        {
+            //vertical axis labels
+
+            //horizontal axis labels
+
+            //draw horizontal margins
+
+            //draw vertical margins
+            //draw midpoints
+            //float[] toReturn = new float[5];
+            float[] toReturn = { 600f, 800f, 0f, 0f, 0f, 0f};
             return toReturn;
         }
     }
