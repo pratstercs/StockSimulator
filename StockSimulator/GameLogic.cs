@@ -215,7 +215,7 @@ namespace StockSimulator
         }
 
         /// <summary>
-        /// Method to get a 2D decimal array for all the stock prices in a specified range
+        /// Method to get a datetime array of the dates for the stock values in a specified range
         /// </summary>
         /// <param name="symbol">The symbol for the data to extract</param>
         /// <param name="start">The DateTime of the start point</param>
@@ -388,42 +388,44 @@ namespace StockSimulator
         /// <returns>The maximum and minimum values (in that order) of the array</returns>
         public static decimal[] getExtremes(decimal[][] data)
         {
-            decimal[] toReturn = new decimal[2];
+            var values = data.SelectMany(x => x); //flatten array
 
-            toReturn[0] = Decimal.MinValue;
-            toReturn[1] = Decimal.MaxValue;
-
-            foreach (decimal[] d in data)
+            decimal[] toReturn =
             {
-                if (d.Max() > toReturn[0])
-                {
-                    toReturn[0] = d.Max();
-                }
-                if (d.Min() < toReturn[1])
-                {
-                    toReturn[1] = d.Min();
-                }
-            }
+                values.Max(),
+                values.Min()
+            };
 
             return toReturn;
         }
 
-        public static string[,] axisLabeller(decimal[][] data)
+        /// TODO: comment
+        public static string[][] axisLabeller(decimal[][] data, DateTime[] dates)
         {
-            string[,] toReturn = new string[2, 10];
+            string[][] toReturn = new string[2][];
+            toReturn[0] = new string[11];
+            toReturn[1] = new string[11];
 
             //get max and min across arrays
-            decimal[] extremes = getExtremes(data);
+            decimal[] extremes = getExtremes(data); //min = 1, max = 0
 
             //left axis labels
-            decimal spacing = ((extremes[0] - extremes[1]) / 10); //10 labels on the vertical axis, so each one 1/10 of the way up
+            decimal leftSpacing = ((extremes[0] - extremes[1]) / 10); //10 labels on the vertical axis, so each one 1/10 of the way up
             for(int i = 0; i < 10; i++)
             {
-                decimal value = extremes[1] + (i * spacing); //minimum + i tenths of the difference
-                toReturn[0, i] = value.ToString();
+                decimal value = extremes[1] + (i * leftSpacing); //minimum + i tenths of the difference
+                toReturn[0][i] = ((int)value).ToString();
             }
+            toReturn[0][10] = ((int)extremes[0]).ToString();
 
             //bottom axis labels
+            float rightSpacing = ((float)dates.Count() / 10f);
+            for(int i = 0; i < 10; i++)
+            {
+                int index = (int)(0 + (i * rightSpacing));
+                toReturn[1][i] = dates[index].ToString("dd/MM/yyyy");
+            }
+            toReturn[1][10] = dates.Last().ToString("dd/MM/yyyy");
 
             return toReturn;
         }
