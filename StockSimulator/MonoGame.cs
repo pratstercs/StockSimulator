@@ -23,9 +23,11 @@ namespace StockSimulator
 
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            graphics.PreferredBackBufferWidth = 1366;  // set this value to the desired width of your window
-            graphics.PreferredBackBufferHeight = 768;   // set this value to the desired height of your window
             this.Window.Title = "StockSimulator";
+
+            graphics.PreferredBackBufferWidth = 1920;
+            graphics.PreferredBackBufferHeight = 1080;
+            graphics.IsFullScreen = false;
 
             graphics.ApplyChanges();
         }
@@ -95,12 +97,47 @@ namespace StockSimulator
             sb.DrawString(font, text, origin, color, radians, new Vector2(0, 0), 1f, SpriteEffects.None, 1f);
         }
 
+        public static void DrawTickerString(SpriteBatch sb, SpriteFont font, string[] text, Vector2 origin)
+        {
+            string symbol = text[0];
+            double value = System.Double.Parse(text[1]);
+            string change = value.ToString("N2") + "%";
+
+            Vector2 changeStart = new Vector2(
+                origin.X + font.MeasureString(symbol).X,
+                origin.Y
+            );
+
+            Color colour;
+            if(value > 0)
+            {
+                colour = Color.Green;
+                change = "▲" + change;
+            }
+            else if(value < 0)
+            {
+                colour = Color.Red;
+                change = "▼" + change;
+            }
+            else
+            {
+                colour = Color.White;
+                change = "=" + change;
+            }
+
+            DrawString(sb, font, symbol, origin, Color.White, 0);
+            DrawString(sb, font, change, changeStart, colour, 0);
+
+        }
+
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            double change = WebInterface.getChange("JPM", "20160502", "20160503");
+
             GraphicsDevice.Clear(Color.White);
 
             // TODO: Add your drawing code here
@@ -111,16 +148,18 @@ namespace StockSimulator
             System.DateTime[] dates = gl.getStockDates("JPM", start, end);
 
             decimal[][] data = gl.getStockDataByDay("JPM", start, end);
-            Color[] colours = { Color.Yellow, Color.Blue, Color.Lime, Color.OrangeRed };
+            Color[] colours = { Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
 
             Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
+            t.SetData(colours);
 
-            float[] values = Graphing.initialiseGraph(spriteBatch, t, font, data, dates, 768, 1366, 0, 0); //draw basics of graph and calculate actual plot area excluding margins, etc
+            float[] values = Graphing.initialiseGraph(spriteBatch, t, font, data, dates, 780, 1620, 150, 150); //draw basics of graph and calculate actual plot area excluding margins, etc
 
-            for(int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
-                Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], (int)values[2], (int)values[3], values[4], values[5]);
+                Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], values[2], values[3], values[4], values[5]);
                 Graphing.drawGraph(t, spriteBatch, colours[i], points);
+                t.SetData(colours);
             }
 
             spriteBatch.End();
@@ -205,7 +244,7 @@ namespace StockSimulator
                 floats[i] -= min; //remove minimum from all values
                 floats[i] /= (max - min); //divide all by converted max to get percentage of graph height
                 floats[i] *= height; //multiply by graph height to get relative heights
-                floats[i] = floats[i]; //flip graph (pixel numbering 0,0 is top left)
+                floats[i] += Ystart;
 
                 toReturn[i] = new Vector2(
                     Xstart + (space * i), //start of graph + spacing for each point
@@ -239,14 +278,14 @@ namespace StockSimulator
             float graphWidth = width - maxLeftWidth; //width of plot area (minus left label width)
             float graphHeight = height - maxBottomHeight; //height of plot area (minus bottom label height)
 
-            float[] toReturn = { graphHeight, graphWidth, width - graphWidth, height - graphHeight, (float)extremes[1], (float)extremes[0] };
+            float[] toReturn = { graphHeight, graphWidth, (width - graphWidth + Xstart), (Ystart), (float)extremes[1], (float)extremes[0] };
 
-            //drawMainMargins(sb, t, height, width, Xstart, Ystart);
+            drawMainMargins(sb, t, height, width, Xstart, Ystart);
             drawMinorMargins(sb, t, graphHeight, graphWidth, Xstart + maxLeftWidth, Ystart);
             drawGridlines(sb, t, graphHeight, Xstart + maxLeftWidth, Ystart, Xstart + width);
 
-            drawLeftAxisLabels(sb, font, labels[0], graphHeight, Xstart, height-maxBottomHeight);
-            drawBottomAxisLabels(sb, font, labels[1], graphWidth, height, (Xstart+maxLeftWidth));
+            drawLeftAxisLabels(sb, font, labels[0], graphHeight, Xstart, height-maxBottomHeight+Ystart);
+            drawBottomAxisLabels(sb, font, labels[1], graphWidth, height+Ystart, (Xstart+maxLeftWidth));
 
             return toReturn;
         }
@@ -267,10 +306,10 @@ namespace StockSimulator
             Vector2 rightTop = new Vector2(Xstart + width, Ystart);
             Vector2 rightBottom = new Vector2(Xstart + width, Ystart + height);
 
-            drawLine(t, sb, Color.Black, origin, leftTop, 5);
-            drawLine(t, sb, Color.Black, leftTop, rightTop, 5);
-            drawLine(t, sb, Color.Black, rightTop, rightBottom, 5);
-            drawLine(t, sb, Color.Black, rightBottom, origin, 5);
+            drawLine(t, sb, Color.Black, origin, leftTop,2);
+            drawLine(t, sb, Color.Black, leftTop, rightTop, 2);
+            drawLine(t, sb, Color.Black, rightTop, rightBottom, 2);
+            drawLine(t, sb, Color.Black, rightBottom, origin, 2);
         }
 
         /// <summary>
