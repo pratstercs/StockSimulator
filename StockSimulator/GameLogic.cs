@@ -464,6 +464,14 @@ namespace StockSimulator
             return getData(url);
         }
 
+        public static double getChange(string symbol, string startDate, string endDate)
+        {
+            //format .../symbol/YYYYMMDD/YYYYMMDD/c
+            string url = "http://philippratt.co.uk:5000/" + symbol + "/" + startDate + "/" + endDate + "/c";
+            return Double.Parse(getData(url));
+
+        }
+
         /// <summary>
         /// Method to download the API response
         /// </summary>
