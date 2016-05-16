@@ -48,6 +48,13 @@ namespace StockSimulator
             ex = e;
         }
 
+        /// <summary>
+        /// Method to get data from the API and add it to the Exchange
+        /// </summary>
+        /// <param name="symbol">The symbol for which to get data</param>
+        /// <param name="startDate">The date to start the data on</param>
+        /// <param name="endDate">The date to end the data on</param>
+        /// <returns>Whether the operation was successful</returns>
         public bool getData(string symbol, string startDate, string endDate)
         {
             try
@@ -240,13 +247,18 @@ namespace StockSimulator
             return toReturn;
         }
 
+        /// <summary>
+        /// Method to get the percentage change for a stock
+        /// </summary>
+        /// <param name="symbol">The symbol to get the change for</param>
+        /// <returns>A StockChange object with the change and date</returns>
         public StockChange getChange(string symbol)
         {
             StockChange toReturn;
 
             changes.TryGetValue(symbol, out toReturn); //get value if exists
 
-            if(toReturn.symbol == null || toReturn.date != currentDate) //if does not exist or is out of date
+            if(toReturn.symbol == null || toReturn.date.Date != currentDate.Date) //if does not exist or is out of date
             {
                 toReturn = Utilities.refreshStockChange(symbol, currentDate);
                 changes.Remove(symbol);
@@ -263,6 +275,12 @@ namespace StockSimulator
     /// </summary>
     public static class Utilities
     {
+        /// <summary>
+        /// Method to query the API for new percentage changes
+        /// </summary>
+        /// <param name="symbol">The symbol to get the change for</param>
+        /// <param name="dte">The date to end the change on</param>
+        /// <returns>A StockChange object containing the date, symbol and percentage change</returns>
         public static StockChange refreshStockChange(string symbol, DateTime dte)
         {
             DateTime date = dte;
@@ -283,7 +301,7 @@ namespace StockSimulator
 
             float change = (float)WebInterface.getChange(symbol, date.AddDays(reduce).ToString("yyyyMMdd"), date.ToString("yyyyMMdd"));
 
-            StockChange toReturn = new StockChange(symbol, change, date);
+            StockChange toReturn = new StockChange(symbol, change, dte);
 
             return toReturn;
         }
@@ -749,6 +767,13 @@ namespace StockSimulator
         public int amount { get; set; }
         public string symbol { get; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="sym">The stock symbol</param>
+        /// <param name="date">The date of the Stock values</param>
+        /// <param name="price">The stock price</param>
+        /// <param name="volume">The number of shares available</param>
         public Stock(string sym, DateTime date, decimal price, int volume)
         {
             symbol = sym;
@@ -764,6 +789,12 @@ namespace StockSimulator
         public float change { get; set; }
         public DateTime date { get; set; }
 
+        /// <summary>
+        /// Construtor
+        /// </summary>
+        /// <param name="sym">The stock symbol</param>
+        /// <param name="chg">The percentage change</param>
+        /// <param name="dte">The date when the change ends</param>
         public StockChange(string sym, float chg, DateTime dte)
         {
             symbol = sym;
