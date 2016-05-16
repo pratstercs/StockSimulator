@@ -27,7 +27,7 @@ namespace StockSimulator
 
             graphics.PreferredBackBufferWidth = 1920;
             graphics.PreferredBackBufferHeight = 1080;
-            graphics.IsFullScreen = false;
+            graphics.IsFullScreen = true;
 
             graphics.ApplyChanges();
         }
@@ -90,11 +90,12 @@ namespace StockSimulator
         /// <param name="text">The text to draw</param>
         /// <param name="origin">The point to start the text</param>
         /// <param name="color">The colour of the text</param>
+        /// <param name="scale">The percentage scaling of the text</param>
         /// <param name="degrees">The angle to rotate in degrees</param>
-        public static void DrawString(SpriteBatch sb, SpriteFont font, string text, Vector2 origin, Color color, int degrees)
+        public static void DrawString(SpriteBatch sb, SpriteFont font, string text, Vector2 origin, Color color, float scale, int degrees)
         {
             float radians = (float)degrees * ((float)System.Math.PI / 180f);
-            sb.DrawString(font, text, origin, color, radians, new Vector2(0, 0), 1f, SpriteEffects.None, 1f);
+            sb.DrawString(font, text, origin, color, radians, new Vector2(0, 0), scale, SpriteEffects.None, 1f);
         }
 
         /// <summary>
@@ -106,13 +107,14 @@ namespace StockSimulator
         /// <param name="origin">The point to draw the string from</param>
         public static void DrawTickerString(SpriteBatch sb, SpriteFont font, string[] text, Vector2 origin)
         {
-            //TODO: Change to White
             string symbol = text[0];
             double value = System.Double.Parse(text[1]);
             string change = value.ToString("N2") + "%";
 
+            float scale = 1.5f;
+
             Vector2 changeStart = new Vector2(
-                origin.X + font.MeasureString(symbol).X,
+                origin.X + font.MeasureString(symbol).X * scale,
                 origin.Y
             );
 
@@ -129,12 +131,12 @@ namespace StockSimulator
             }
             else
             {
-                colour = Color.Black;
+                colour = Color.White;
                 change = "= " + change;
             }
 
-            DrawString(sb, font, symbol, origin, Color.Black, 0);
-            DrawString(sb, font, change, changeStart, colour, 0);
+            DrawString(sb, font, symbol, origin, Color.White, scale, 0);
+            DrawString(sb, font, change, changeStart, colour, scale, 0);
 
         }
 
@@ -144,33 +146,36 @@ namespace StockSimulator
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            double change = WebInterface.getChange("JPM", "20160502", "20160503");
-
-            GraphicsDevice.Clear(Color.White);
-
-            // TODO: Add your drawing code here
+            GraphicsDevice.Clear(Color.LightGray);
             spriteBatch.Begin();
-
-            DrawTickerString(spriteBatch, font, new string[] { "JPM", change.ToString() }, new Vector2(50, 50));
-
-            System.DateTime start = new System.DateTime(2015, 1, 1);
-            System.DateTime end = new System.DateTime(2016, 1, 1);
-            System.DateTime[] dates = gl.getStockDates("JPM", start, end);
-
-            decimal[][] data = gl.getStockDataByDay("JPM", start, end);
-            Color[] colours = { Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
-
             Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
-            t.SetData(colours);
 
-            float[] values = Graphing.initialiseGraph(spriteBatch, t, font, data, dates, 780, 1620, 150, 150); //draw basics of graph and calculate actual plot area excluding margins, etc
+            float height = graphics.PreferredBackBufferHeight;
+            float width = graphics.PreferredBackBufferWidth;
 
-            for (int i = 0; i < 4; i++)
-            {
-                Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], values[2], values[3], values[4], values[5]);
-                Graphing.drawGraph(t, spriteBatch, colours[i], points);
-                t.SetData(colours);
-            }
+            Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, height * 0.08f), new Vector2(width, height * 0.08f), 35);
+            Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, height * 0.875f), new Vector2(width, height * 0.875f), 5);
+
+            double change = WebInterface.getChange("JPM", "20160502", "20160503");
+            DrawTickerString(spriteBatch, font, new string[] { "JPM", change.ToString() }, new Vector2(0, height * 0.08f));
+
+            //System.DateTime start = new System.DateTime(2015, 1, 1);
+            //System.DateTime end = new System.DateTime(2016, 1, 1);
+            //System.DateTime[] dates = gl.getStockDates("JPM", start, end);
+
+            //decimal[][] data = gl.getStockDataByDay("JPM", start, end);
+            //Color[] colours = { Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
+
+            //t.SetData(colours);
+
+            //float[] values = Graphing.initialiseGraph(spriteBatch, t, font, data, dates, 780, 1620, 150, 150); //draw basics of graph and calculate actual plot area excluding margins, etc
+
+            //for (int i = 0; i < 4; i++)
+            //{
+            //    Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], values[2], values[3], values[4], values[5]);
+            //    Graphing.drawGraph(t, spriteBatch, colours[i], points);
+            //    t.SetData(colours);
+            //}
 
             spriteBatch.End();
 
@@ -379,7 +384,7 @@ namespace StockSimulator
 
             for(int i = 0; i < 11; i++)
             {
-                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart, (Ystart - (spacing * i))), Color.Black, 0);
+                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart, (Ystart - (spacing * i))), Color.Black, 1f, 0);
             }
         }
 
@@ -398,7 +403,7 @@ namespace StockSimulator
 
             for (int i = 0; i < 11; i++)
             {
-                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart + (spacing * i), height), Color.Black, -45);
+                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart + (spacing * i), height), Color.Black, 1f, -45);
             }
         }
 
