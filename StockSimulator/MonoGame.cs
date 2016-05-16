@@ -43,6 +43,12 @@ namespace StockSimulator
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            //add other stocks to exchange
+            string[] symbols = { "MSFT", "AAPL", "TSLA", "GOOG", "AMZN", "FB", "HPQ", "SYMC" };
+            foreach (string s in symbols)
+            {
+                gl.getData(s, "20160401", "20160501");
+            }
 
             base.Initialize();
         }
@@ -166,8 +172,12 @@ namespace StockSimulator
             Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, height * 0.08f), new Vector2(width, height * 0.08f), 35);
             Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, height * 0.875f), new Vector2(width, height * 0.875f), 5);
 
-            float change = gl.getChange("JPM").change;
-            DrawTickerString(spriteBatch, font, new string[] { "JPM", change.ToString() }, new Vector2(width - tickerScroll, height * 0.085f));
+            gl.getAllChanges();
+            float offset = 0;
+            foreach(StockChange sc in gl.changes.Values)
+            {
+                offset += 1.5f * DrawTickerString(spriteBatch, font, new string[] { sc.symbol, sc.change.ToString() }, new Vector2(width - (tickerScroll + offset), height * 0.085f));
+            }
 
             //System.DateTime start = new System.DateTime(2015, 1, 1);
             //System.DateTime end = new System.DateTime(2016, 1, 1);
