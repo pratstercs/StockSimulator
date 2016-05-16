@@ -16,21 +16,25 @@ namespace StockSimulator
         public Exchange ex; //TODO: make private with accessors
         public List<Stock> wallet = new List<Stock>(); //TODO: make private with accessors
         public decimal cash; //TODO: make private
+        private Dictionary<string,StockChange> changes = new Dictionary<string, StockChange>();
 
-        public DateTime currentDate
-        {
-            get { return currentDate; }
-            set
-            {
-                currentDate = value;
-                //if currentDate == "new day"
-                // then update ticker with new data?
-            }
-        }
+        public DateTime currentDate;
+        //{
+        //    get { return currentDate; }
+        //    set
+        //    {
+        //        currentDate = value;
+        //        //if currentDate == "new day"
+        //        // then update ticker with new data?
+        //    }
+        //}
 
         public GameLogic()
         {
             ex = new Exchange();
+
+            currentDate = DateTime.Now;
+            currentDate = currentDate.AddMonths(-1);
         }
 
         /// <summary>
@@ -235,6 +239,22 @@ namespace StockSimulator
 
             return toReturn;
         }
+
+        public StockChange getChange(string symbol)
+        {
+            StockChange toReturn;
+
+            changes.TryGetValue(symbol, out toReturn); //get value if exists
+
+            if(toReturn.symbol == null || toReturn.date != currentDate) //if does not exist or is out of date
+            {
+                toReturn = Utilities.refreshStockChange(symbol, currentDate);
+                changes.Remove(symbol);
+                changes.Add(symbol, toReturn);
+            }
+
+            return toReturn;
+        }
     }
     
 
@@ -243,6 +263,31 @@ namespace StockSimulator
     /// </summary>
     public static class Utilities
     {
+        public static StockChange refreshStockChange(string symbol, DateTime dte)
+        {
+            DateTime date = dte;
+            int reduce = -1;
+
+            if(date.DayOfWeek == DayOfWeek.Monday)
+            {
+                reduce = -3;
+            }
+            else if (date.DayOfWeek == DayOfWeek.Saturday)
+            {
+                date = date.AddDays(-1);
+            }
+            else if (date.DayOfWeek == DayOfWeek.Sunday)
+            {
+                date = date.AddDays(-2);
+            }
+
+            float change = (float)WebInterface.getChange(symbol, date.AddDays(reduce).ToString("yyyyMMdd"), date.ToString("yyyyMMdd"));
+
+            StockChange toReturn = new StockChange(symbol, change, date);
+
+            return toReturn;
+        }
+
         /// <summary>
         /// Converts a MetaStock formatted date ("YYYYMMDD") into a DateTime object
         /// </summary>
@@ -710,6 +755,20 @@ namespace StockSimulator
             purchaseDate = date;
             purchasePrice = price;
             amount = volume;
+        }
+    }
+
+    public struct StockChange
+    {
+        public string symbol { get; }
+        public float change { get; set; }
+        public DateTime date { get; set; }
+
+        public StockChange(string sym, float chg, DateTime dte)
+        {
+            symbol = sym;
+            change = chg;
+            date = dte;
         }
     }
 }
