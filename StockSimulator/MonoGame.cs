@@ -18,6 +18,9 @@ namespace StockSimulator
 
         float tickerScroll = 0;
 
+        /// <summary>
+        /// Basic constructor
+        /// </summary>
         public MonoGame()
         {
             gl = new GameLogic();
