@@ -97,8 +97,16 @@ namespace StockSimulator
             sb.DrawString(font, text, origin, color, radians, new Vector2(0, 0), 1f, SpriteEffects.None, 1f);
         }
 
+        /// <summary>
+        /// Method to draw a string in the ticker
+        /// </summary>
+        /// <param name="sb">SpriteBatch</param>
+        /// <param name="font">Spritefont to use - must include ▲ and ▼ (&#x25B2; and &#x25BC;)</param>
+        /// <param name="text">A string array containing 0 - the symbol, and 1 - the percentage change</param>
+        /// <param name="origin">The point to draw the string from</param>
         public static void DrawTickerString(SpriteBatch sb, SpriteFont font, string[] text, Vector2 origin)
         {
+            //TODO: Change to White
             string symbol = text[0];
             double value = System.Double.Parse(text[1]);
             string change = value.ToString("N2") + "%";
@@ -112,20 +120,20 @@ namespace StockSimulator
             if(value > 0)
             {
                 colour = Color.Green;
-                change = "▲" + change;
+                change = "▲ " + change;
             }
             else if(value < 0)
             {
                 colour = Color.Red;
-                change = "▼" + change;
+                change = "▼ " + change;
             }
             else
             {
-                colour = Color.White;
-                change = "=" + change;
+                colour = Color.Black;
+                change = "= " + change;
             }
 
-            DrawString(sb, font, symbol, origin, Color.White, 0);
+            DrawString(sb, font, symbol, origin, Color.Black, 0);
             DrawString(sb, font, change, changeStart, colour, 0);
 
         }
@@ -142,6 +150,8 @@ namespace StockSimulator
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
+
+            DrawTickerString(spriteBatch, font, new string[] { "JPM", change.ToString() }, new Vector2(50, 50));
 
             System.DateTime start = new System.DateTime(2015, 1, 1);
             System.DateTime end = new System.DateTime(2016, 1, 1);
