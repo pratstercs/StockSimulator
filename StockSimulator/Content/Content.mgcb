@@ -24,9 +24,9 @@
 /processorParam:TextureFormat=Color
 /build:RedDot.png
 
-#begin font.spritefont
+#begin f_120.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:TextureFormat=Compressed
-/build:font.spritefont
+/build:f_120.spritefont
 

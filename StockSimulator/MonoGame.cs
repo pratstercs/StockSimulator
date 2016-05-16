@@ -14,7 +14,9 @@ namespace StockSimulator
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         //Texture2D t;
-        SpriteFont font;
+        SpriteFont f_120;
+
+        GameState state = GameState.MainMenu;
 
         float tickerScroll = 0;
 
@@ -23,8 +25,8 @@ namespace StockSimulator
         /// </summary>
         public MonoGame()
         {
-            gl = new GameLogic();
-            gl.getData("JPM", "20150101", "20160101");
+            //gl = new GameLogic();
+            //gl.getData("JPM", "20150101", "20160101");
 
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -33,6 +35,8 @@ namespace StockSimulator
             graphics.PreferredBackBufferWidth = 1920;
             graphics.PreferredBackBufferHeight = 1080;
             graphics.IsFullScreen = false;
+
+            graphics.PreferMultiSampling = true;
 
             graphics.ApplyChanges();
         }
@@ -47,11 +51,11 @@ namespace StockSimulator
         {
             // TODO: Add your initialization logic here
             //add other stocks to exchange
-            string[] symbols = { "MSFT", "AAPL", "TSLA", "GOOG", "AMZN", "FB", "HPQ", "SYMC" };
-            foreach (string s in symbols)
-            {
-                gl.getData(s, "20160401", "20160501");
-            }
+            //string[] symbols = { "MSFT", "AAPL", "TSLA", "GOOG", "AMZN", "FB", "HPQ", "SYMC" };
+            //foreach (string s in symbols)
+            //{
+            //    gl.getData(s, "20160401", "20160501");
+            //}
 
             base.Initialize();
         }
@@ -64,7 +68,7 @@ namespace StockSimulator
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            font = Content.Load<SpriteFont>("font");
+            f_120 = Content.Load<SpriteFont>("f_120");
 
             // TODO: use this.Content to load your game content here
         }
@@ -88,11 +92,19 @@ namespace StockSimulator
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
-
             tickerScroll = (tickerScroll + 1) % graphics.PreferredBackBufferWidth;
 
             base.Update(gameTime);
+
+            switch(state)
+            {
+                case GameState.MainMenu:
+                    break;
+                case GameState.Sandbox:
+                    break;
+                default:
+                    break;
+            }
         }
 
         /// <summary>
@@ -125,7 +137,7 @@ namespace StockSimulator
             double value = System.Double.Parse(text[1]);
             string change = value.ToString("N2") + "%";
 
-            float scale = 1.5f;
+            float scale = 0.15f;
 
             float width = font.MeasureString(symbol).X * scale; //calculate width of symbol text
 
@@ -177,32 +189,60 @@ namespace StockSimulator
 
             gl.getAllChanges();
             float offset = 0;
-            foreach(StockChange sc in gl.changes.Values)
+            foreach (StockChange sc in gl.changes.Values)
             {
-                offset += 1.5f * DrawTickerString(spriteBatch, font, new string[] { sc.symbol, sc.change.ToString() }, new Vector2(width - (tickerScroll + offset), height * 0.085f));
+                offset += 1.5f * DrawTickerString(spriteBatch, f_120, new string[] { sc.symbol, sc.change.ToString() }, new Vector2(width - (tickerScroll + offset), height * 0.085f));
             }
 
-            //System.DateTime start = new System.DateTime(2015, 1, 1);
-            //System.DateTime end = new System.DateTime(2016, 1, 1);
-            //System.DateTime[] dates = gl.getStockDates("JPM", start, end);
+            System.DateTime start = new System.DateTime(2015, 1, 1);
+            System.DateTime end = new System.DateTime(2016, 1, 1);
+            System.DateTime[] dates = gl.getStockDates("JPM", start, end);
 
-            //decimal[][] data = gl.getStockDataByDay("JPM", start, end);
-            //Color[] colours = { Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
+            decimal[][] data = gl.getStockDataByDay("JPM", start, end);
+            Color[] colours = { Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
 
-            //t.SetData(colours);
+            t.SetData(colours);
 
-            //float[] values = Graphing.initialiseGraph(spriteBatch, t, font, data, dates, 780, 1620, 150, 150); //draw basics of graph and calculate actual plot area excluding margins, etc
+            float[] values = Graphing.initialiseGraph(spriteBatch, t, f_120, data, dates, 780, 1620, 150, 150); //draw basics of graph and calculate actual plot area excluding margins, etc
 
-            //for (int i = 0; i < 4; i++)
-            //{
-            //    Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], values[2], values[3], values[4], values[5]);
-            //    Graphing.drawGraph(t, spriteBatch, colours[i], points);
-            //    t.SetData(colours);
-            //}
+            for (int i = 0; i < 4; i++)
+            {
+                Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], values[2], values[3], values[4], values[5]);
+                Graphing.drawGraph(t, spriteBatch, colours[i], points);
+                t.SetData(colours);
+            }
 
             spriteBatch.End();
 
             base.Draw(gameTime);
+
+            switch(state)
+            {
+                case GameState.MainMenu:
+                    drawMainMenu();
+                    break;
+                case GameState.Sandbox:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void drawMainMenu()
+        {
+            GraphicsDevice.Clear(Color.LightGray);
+            spriteBatch.Begin();
+
+            Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
+
+            float height = graphics.PreferredBackBufferHeight;
+            float width = graphics.PreferredBackBufferWidth;
+
+            float start = (width - f_120.MeasureString("StockSimulator").X) / 2;
+
+            DrawString(spriteBatch, f_120, "StockSimulator", new Vector2(start, height * 0.15f), Color.Maroon, 1f, 0);
+
+            spriteBatch.End();
         }
     }
 
@@ -310,8 +350,8 @@ namespace StockSimulator
             string[][] labels = Utilities.axisLabeller(data, dates);
             decimal[] extremes = Utilities.getExtremes(data);
 
-            int maxLeftWidth = (int)labels[0].Max(x => font.MeasureString(x).X); //get length of longest string
-            int maxBottomHeight = labels[1].Max(x => pythagoreanShite(font.MeasureString(x))); //get length of longest string
+            int maxLeftWidth = (int)labels[0].Max(x => (font.MeasureString(x).X / 10f)); //get length of longest string
+            int maxBottomHeight = labels[1].Max(x => pythagoreanShite((font.MeasureString(x) / 10f))); //get length of longest string
 
             float graphWidth = width - maxLeftWidth; //width of plot area (minus left label width)
             float graphHeight = height - maxBottomHeight; //height of plot area (minus bottom label height)
@@ -407,7 +447,7 @@ namespace StockSimulator
 
             for(int i = 0; i < 11; i++)
             {
-                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart, (Ystart - (spacing * i))), Color.Black, 1f, 0);
+                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart, (Ystart - (spacing * i))), Color.Black, 0.1f, 0);
             }
         }
 
@@ -426,7 +466,7 @@ namespace StockSimulator
 
             for (int i = 0; i < 11; i++)
             {
-                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart + (spacing * i), height), Color.Black, 1f, -45);
+                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart + (spacing * i), height), Color.Black, 0.1f, -45);
             }
         }
 
@@ -439,5 +479,11 @@ namespace StockSimulator
         {
             return (int)System.Math.Sqrt(System.Math.Pow(v.X,2) + System.Math.Pow(v.Y, 2));
         }
+    }
+
+    enum GameState
+    {
+        MainMenu,
+        Sandbox
     }
 }
