@@ -27,7 +27,7 @@ namespace StockSimulator
 
             graphics.PreferredBackBufferWidth = 1920;
             graphics.PreferredBackBufferHeight = 1080;
-            graphics.IsFullScreen = true;
+            graphics.IsFullScreen = false;
 
             graphics.ApplyChanges();
         }
@@ -105,7 +105,8 @@ namespace StockSimulator
         /// <param name="font">Spritefont to use - must include ▲ and ▼ (&#x25B2; and &#x25BC;)</param>
         /// <param name="text">A string array containing 0 - the symbol, and 1 - the percentage change</param>
         /// <param name="origin">The point to draw the string from</param>
-        public static void DrawTickerString(SpriteBatch sb, SpriteFont font, string[] text, Vector2 origin)
+        /// <returns>A float of the width of the text</returns>
+        public static float DrawTickerString(SpriteBatch sb, SpriteFont font, string[] text, Vector2 origin)
         {
             string symbol = text[0];
             double value = System.Double.Parse(text[1]);
@@ -113,15 +114,17 @@ namespace StockSimulator
 
             float scale = 1.5f;
 
+            float width = font.MeasureString(symbol).X * scale; //calculate width of symbol text
+
             Vector2 changeStart = new Vector2(
-                origin.X + font.MeasureString(symbol).X * scale,
+                origin.X + width,
                 origin.Y
-            );
+            ); //declare start location of change text
 
             Color colour;
             if(value > 0)
             {
-                colour = Color.Green;
+                colour = Color.Lime;
                 change = "▲ " + change;
             }
             else if(value < 0)
@@ -135,9 +138,12 @@ namespace StockSimulator
                 change = "= " + change;
             }
 
+            width += font.MeasureString(change).X * scale; //add change text to width
+
             DrawString(sb, font, symbol, origin, Color.White, scale, 0);
             DrawString(sb, font, change, changeStart, colour, scale, 0);
 
+            return width;
         }
 
         /// <summary>
@@ -156,8 +162,8 @@ namespace StockSimulator
             Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, height * 0.08f), new Vector2(width, height * 0.08f), 35);
             Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, height * 0.875f), new Vector2(width, height * 0.875f), 5);
 
-            double change = WebInterface.getChange("JPM", "20160502", "20160503");
-            DrawTickerString(spriteBatch, font, new string[] { "JPM", change.ToString() }, new Vector2(0, height * 0.08f));
+            float change = gl.getChange("JPM").change;
+            DrawTickerString(spriteBatch, font, new string[] { "JPM", change.ToString() }, new Vector2(0, height * 0.085f));
 
             //System.DateTime start = new System.DateTime(2015, 1, 1);
             //System.DateTime end = new System.DateTime(2016, 1, 1);
