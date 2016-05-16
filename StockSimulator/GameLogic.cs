@@ -13,29 +13,34 @@ namespace StockSimulator
 {
     public class GameLogic
     {
-        public Exchange ex; //TODO: make private with accessors
-        public List<Stock> wallet = new List<Stock>(); //TODO: make private with accessors
-        public decimal cash; //TODO: make private
+        public Exchange ex; // { get; private set; }
+        public List<Stock> wallet = new List<Stock>(); // { get; private set; }
+        public decimal cash; // { get; private set; }
         public Dictionary<string,StockChange> changes = new Dictionary<string, StockChange>();
 
         public DateTime currentDate;
-        //{
-        //    get { return currentDate; }
-        //    set
-        //    {
-        //        currentDate = value;
-        //        //if currentDate == "new day"
-        //        // then update ticker with new data?
-        //    }
-        //}
-
-        public GameLogic()
+        public DateTime CurrentDate
         {
-            ex = new Exchange();
-
-            currentDate = DateTime.Now;
-            currentDate = currentDate.AddMonths(-1);
+            get
+            {
+                return currentDate;
+            }
+            set
+            {
+                currentDate = value;
+            }
         }
+
+        /// <summary>
+        /// Empty exchange constructor
+        /// </summary>
+        public GameLogic()
+                {
+                    ex = new Exchange();
+
+                    currentDate = DateTime.Now;
+                    currentDate = currentDate.AddMonths(-1);
+                }
 
         /// <summary>
         /// Constructor for pre-configured scenario
