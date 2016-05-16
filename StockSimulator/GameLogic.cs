@@ -16,7 +16,7 @@ namespace StockSimulator
         public Exchange ex; //TODO: make private with accessors
         public List<Stock> wallet = new List<Stock>(); //TODO: make private with accessors
         public decimal cash; //TODO: make private
-        private Dictionary<string,StockChange> changes = new Dictionary<string, StockChange>();
+        public Dictionary<string,StockChange> changes = new Dictionary<string, StockChange>();
 
         public DateTime currentDate;
         //{
@@ -266,6 +266,17 @@ namespace StockSimulator
             }
 
             return toReturn;
+        }
+
+        /// <summary>
+        /// Get percentage changes for all stocks in exchange
+        /// </summary>
+        public void getAllChanges()
+        {
+            foreach(string str in ex.Keys)
+            {
+                getChange(str);
+            }
         }
     }
     
