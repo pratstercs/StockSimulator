@@ -16,6 +16,8 @@ namespace StockSimulator
         //Texture2D t;
         SpriteFont font;
 
+        float tickerScroll = 0;
+
         public MonoGame()
         {
             gl = new GameLogic();
@@ -79,6 +81,8 @@ namespace StockSimulator
 
             // TODO: Add your update logic here
 
+            tickerScroll = (tickerScroll + 1) % graphics.PreferredBackBufferWidth;
+
             base.Update(gameTime);
         }
 
@@ -125,17 +129,17 @@ namespace StockSimulator
             if(value > 0)
             {
                 colour = Color.Lime;
-                change = "▲ " + change;
+                change = " ▲" + change;
             }
             else if(value < 0)
             {
                 colour = Color.Red;
-                change = "▼ " + change;
+                change = " ▼" + change;
             }
             else
             {
                 colour = Color.White;
-                change = "= " + change;
+                change = " =" + change;
             }
 
             width += font.MeasureString(change).X * scale; //add change text to width
@@ -163,7 +167,7 @@ namespace StockSimulator
             Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, height * 0.875f), new Vector2(width, height * 0.875f), 5);
 
             float change = gl.getChange("JPM").change;
-            DrawTickerString(spriteBatch, font, new string[] { "JPM", change.ToString() }, new Vector2(0, height * 0.085f));
+            DrawTickerString(spriteBatch, font, new string[] { "JPM", change.ToString() }, new Vector2(width - tickerScroll, height * 0.085f));
 
             //System.DateTime start = new System.DateTime(2015, 1, 1);
             //System.DateTime end = new System.DateTime(2016, 1, 1);
