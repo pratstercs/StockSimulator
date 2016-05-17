@@ -20,8 +20,8 @@ namespace StockSimulator
         public static GameLogic gl;
         public static SpriteFont f_120;
 
-        public static int WINDOW_HEIGHT = 1080;
-        public static int WINDOW_WIDTH = 1920;
+        public static int WINDOW_HEIGHT = 768;
+        public static int WINDOW_WIDTH = 1366;
 
         GameState state = GameState.MainMenu;
 
