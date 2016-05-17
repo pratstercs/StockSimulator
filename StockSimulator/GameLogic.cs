@@ -42,6 +42,14 @@ namespace StockSimulator
                     currentDate = currentDate.AddMonths(-1);
                 }
 
+        public GameLogic(DateTime date, decimal money)
+        {
+            ex = new Exchange();
+            currentDate = date;
+            cash = money;
+        }
+
+
         /// <summary>
         /// Constructor for pre-configured scenario
         /// </summary>
