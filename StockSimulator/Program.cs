@@ -16,7 +16,7 @@ namespace StockSimulator
         [STAThread]
         static void Main()
         {
-            using (var game = new MonoGame())
+            using (var game = new ScreenManager())
                 game.Run();
         }
     }

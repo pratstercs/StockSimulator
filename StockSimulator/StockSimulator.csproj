@@ -40,7 +40,10 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="MainMenu.cs" />
+    <Compile Include="ScreenManager.cs" />
     <Compile Include="GameLogic.cs" />
+    <Compile Include="GameScreen.cs" />
     <Compile Include="MonoGame.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
