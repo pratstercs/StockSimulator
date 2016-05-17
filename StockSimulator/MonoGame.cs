@@ -16,6 +16,9 @@ namespace StockSimulator
         //Texture2D t;
         SpriteFont f_120;
 
+        static int WINDOW_HEIGHT = 1920;
+        static int WINDOW_WIDTH = 1080;
+
         GameState state = GameState.MainMenu;
 
         float tickerScroll = 0;
@@ -32,8 +35,8 @@ namespace StockSimulator
             Content.RootDirectory = "Content";
             this.Window.Title = "StockSimulator";
 
-            graphics.PreferredBackBufferWidth = 1920;
-            graphics.PreferredBackBufferHeight = 1080;
+            graphics.PreferredBackBufferHeight = WINDOW_HEIGHT;
+            graphics.PreferredBackBufferWidth = WINDOW_WIDTH;
             graphics.IsFullScreen = false;
 
             graphics.PreferMultiSampling = true;
@@ -49,7 +52,7 @@ namespace StockSimulator
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            this.IsMouseVisible = true;
             //add other stocks to exchange
             //string[] symbols = { "MSFT", "AAPL", "TSLA", "GOOG", "AMZN", "FB", "HPQ", "SYMC" };
             //foreach (string s in symbols)
@@ -92,7 +95,7 @@ namespace StockSimulator
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            tickerScroll = (tickerScroll + 1) % graphics.PreferredBackBufferWidth;
+            tickerScroll = (tickerScroll + 1) % WINDOW_WIDTH;
 
             base.Update(gameTime);
 
@@ -177,42 +180,35 @@ namespace StockSimulator
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.LightGray);
-            spriteBatch.Begin();
-            Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
+            //GraphicsDevice.Clear(Color.LightGray);
+            //spriteBatch.Begin();
 
-            float height = graphics.PreferredBackBufferHeight;
-            float width = graphics.PreferredBackBufferWidth;
+            //Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, WINDOW_HEIGHT * 0.08f), new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT * 0.08f), 35);
+            //Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, WINDOW_HEIGHT * 0.875f), new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT * 0.875f), 5);
 
-            Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, height * 0.08f), new Vector2(width, height * 0.08f), 35);
-            Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, height * 0.875f), new Vector2(width, height * 0.875f), 5);
+            //gl.getAllChanges();
+            //float offset = 0;
+            //foreach (StockChange sc in gl.changes.Values)
+            //{
+            //    offset += 1.5f * DrawTickerString(spriteBatch, f_120, new string[] { sc.symbol, sc.change.ToString() }, new Vector2(width - (tickerScroll + offset), height * 0.085f));
+            //}
 
-            gl.getAllChanges();
-            float offset = 0;
-            foreach (StockChange sc in gl.changes.Values)
-            {
-                offset += 1.5f * DrawTickerString(spriteBatch, f_120, new string[] { sc.symbol, sc.change.ToString() }, new Vector2(width - (tickerScroll + offset), height * 0.085f));
-            }
+            //System.DateTime start = new System.DateTime(2015, 1, 1);
+            //System.DateTime end = new System.DateTime(2016, 1, 1);
+            //System.DateTime[] dates = gl.getStockDates("JPM", start, end);
 
-            System.DateTime start = new System.DateTime(2015, 1, 1);
-            System.DateTime end = new System.DateTime(2016, 1, 1);
-            System.DateTime[] dates = gl.getStockDates("JPM", start, end);
+            //decimal[][] data = gl.getStockDataByDay("JPM", start, end);
+            //Color[] colours = { Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
 
-            decimal[][] data = gl.getStockDataByDay("JPM", start, end);
-            Color[] colours = { Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
+            //float[] values = Graphing.initialiseGraph(spriteBatch, t, f_120, data, dates, 780, 1620, 150, 150); //draw basics of graph and calculate actual plot area excluding margins, etc
 
-            t.SetData(colours);
+            //for (int i = 0; i < 4; i++)
+            //{
+            //    Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], values[2], values[3], values[4], values[5]);
+            //    Graphing.drawGraph(GraphicsDevice, spriteBatch, colours[i], points);
+            //}
 
-            float[] values = Graphing.initialiseGraph(spriteBatch, t, f_120, data, dates, 780, 1620, 150, 150); //draw basics of graph and calculate actual plot area excluding margins, etc
-
-            for (int i = 0; i < 4; i++)
-            {
-                Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], values[2], values[3], values[4], values[5]);
-                Graphing.drawGraph(t, spriteBatch, colours[i], points);
-                t.SetData(colours);
-            }
-
-            spriteBatch.End();
+            //spriteBatch.End();
 
             base.Draw(gameTime);
 
@@ -230,17 +226,40 @@ namespace StockSimulator
 
         private void drawMainMenu()
         {
+            ///TODO: Move this to own class
+            ///Main menu class - take in spriteBatch, etc as paramters
+            ///global vars such as Rectangle CampaignButton
+            ///set up during initialize
+            ///use same rectangle objects in draw and update to avoid duplication
+            
             GraphicsDevice.Clear(Color.LightGray);
             spriteBatch.Begin();
 
             Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
+            t.SetData(new[] { Color.Maroon });
 
-            float height = graphics.PreferredBackBufferHeight;
-            float width = graphics.PreferredBackBufferWidth;
+            float start = (WINDOW_WIDTH - f_120.MeasureString("StockSimulator").X) / 2;
 
-            float start = (width - f_120.MeasureString("StockSimulator").X) / 2;
+            DrawString(spriteBatch, f_120, "StockSimulator", new Vector2(start, WINDOW_HEIGHT * 0.15f), Color.Maroon, 1f, 0);
 
-            DrawString(spriteBatch, f_120, "StockSimulator", new Vector2(start, height * 0.15f), Color.Maroon, 1f, 0);
+            float startPoint = WINDOW_WIDTH * 0.2f;
+            float buttonAreaWidth = WINDOW_WIDTH * 0.6f;
+            int buttonWidth = (int)(buttonAreaWidth * 0.2f);
+            int buttonHeight = (int)(WINDOW_HEIGHT * 0.05f);
+            int heightPoint = (int)(WINDOW_HEIGHT * 0.6f);
+
+            string[] labels = { "Campaign", "Sandbox", "Load Game", "Exit Game" };
+
+            for(int i = 0; i < 4; i++)
+            {
+                spriteBatch.Draw(t, new Rectangle((int)startPoint, heightPoint, buttonWidth, buttonHeight), Color.Maroon);
+                Vector2 textSize = f_120.MeasureString(labels[i]) / 10f;
+                Vector2 textStart = new Vector2(((buttonWidth - textSize.X) / 2) + startPoint, ((buttonHeight - textSize.Y) / 2) + heightPoint);
+
+                DrawString(spriteBatch, f_120, labels[i], textStart, Color.White, 0.1f, 0);
+
+                startPoint += buttonWidth * 1.25f;
+            }
 
             spriteBatch.End();
         }
@@ -258,8 +277,6 @@ namespace StockSimulator
         /// <param name="end">The co-ordinates of the ending point</param>
         public static void drawLine(Texture2D t, SpriteBatch sb, Color color, Vector2 start, Vector2 end, int width)
         {
-            t.SetData<Color>(new Color[] { color });
-
             Vector2 edge = end - start;
             // calculate angle to rotate line
             float angle =
@@ -287,14 +304,15 @@ namespace StockSimulator
         /// <param name="sb">The SpriteBatch</param>
         /// <param name="color">The Colour for the lines</param>
         /// <param name="data">The co-ordinates of the points to graph</param>
-        public static void drawGraph(Texture2D t, SpriteBatch sb, Color color, Vector2[] data)
+        public static void drawGraph(GraphicsDevice g, SpriteBatch sb, Color color, Vector2[] data)
         {
             Vector2 prevPoint = new Vector2(data[0].X, data[0].Y); //set initial "previous point" to the first point in the dataset
 
-
-            //draw each data line
             foreach (Vector2 point in data)
             {
+                Texture2D t = new Texture2D(g, 1, 1);
+                t.SetData(new[] { color });
+
                 drawLine(t, sb, color, prevPoint, point, 3);
                 prevPoint = point;
             }
