@@ -180,39 +180,39 @@ namespace StockSimulator
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.LightGray);
-            spriteBatch.Begin();
+            //GraphicsDevice.Clear(Color.LightGray);
+            //spriteBatch.Begin();
 
-            Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
+            //Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
 
-            Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, WINDOW_HEIGHT * 0.08f), new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT * 0.08f), 35);
-            Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, WINDOW_HEIGHT * 0.875f), new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT * 0.875f), 5);
+            //Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, WINDOW_HEIGHT * 0.08f), new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT * 0.08f), 35);
+            //Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, WINDOW_HEIGHT * 0.875f), new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT * 0.875f), 5);
 
-            gl.getAllChanges();
-            float offset = 0;
-            foreach (StockChange sc in gl.changes.Values)
-            {
-                offset += 1.5f * DrawTickerString(spriteBatch, f_120, new string[] { sc.symbol, sc.change.ToString() }, new Vector2(WINDOW_WIDTH - (tickerScroll + offset), WINDOW_HEIGHT * 0.085f));
-            }
+            //gl.getAllChanges();
+            //float offset = 0;
+            //foreach (StockChange sc in gl.changes.Values)
+            //{
+            //    offset += 1.5f * DrawTickerString(spriteBatch, f_120, new string[] { sc.symbol, sc.change.ToString() }, new Vector2(WINDOW_WIDTH - (tickerScroll + offset), WINDOW_HEIGHT * 0.085f));
+            //}
 
-            System.DateTime start = new System.DateTime(2015, 1, 1);
-            System.DateTime end = new System.DateTime(2016, 1, 1);
-            System.DateTime[] dates = gl.getStockDates("JPM", start, end);
+            //System.DateTime start = new System.DateTime(2015, 1, 1);
+            //System.DateTime end = new System.DateTime(2016, 1, 1);
+            //System.DateTime[] dates = gl.getStockDates("JPM", start, end);
 
-            decimal[][] data = gl.getStockDataByDay("JPM", start, end);
-            Color[] colours = { Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
+            //decimal[][] data = gl.getStockDataByDay("JPM", start, end);
+            //Color[] colours = { Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
 
-            float[] values = Graphing.initialiseGraph(spriteBatch, t, f_120, data, dates, 780, 1620, 150, 150); //draw basics of graph and calculate actual plot area excluding margins, etc
+            //float[] values = Graphing.initialiseGraph(spriteBatch, t, f_120, data, dates, 780, 1620, 150, 150); //draw basics of graph and calculate actual plot area excluding margins, etc
 
-            for (int i = 0; i < 4; i++)
-            {
-                Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], values[2], values[3], values[4], values[5]);
-                Graphing.drawGraph(GraphicsDevice, spriteBatch, colours[i], points);
-            }
+            //for (int i = 0; i < 4; i++)
+            //{
+            //    Vector2[] points = Graphing.pointMaker(data[i], values[0], values[1], values[2], values[3], values[4], values[5]);
+            //    Graphing.drawGraph(GraphicsDevice, spriteBatch, colours[i], points);
+            //}
 
-            spriteBatch.End();
+            //spriteBatch.End();
 
-            base.Draw(gameTime);
+            //base.Draw(gameTime);
 
             //switch(state)
             //{
