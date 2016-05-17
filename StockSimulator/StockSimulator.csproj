@@ -41,6 +41,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="MainMenu.cs" />
+    <Compile Include="PlayScreen.cs" />
     <Compile Include="ScreenManager.cs" />
     <Compile Include="GameLogic.cs" />
     <Compile Include="GameScreen.cs" />
