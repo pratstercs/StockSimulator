@@ -14,14 +14,14 @@ namespace StockSimulator
         public static int WINDOW_HEIGHT = ScreenManager.WINDOW_HEIGHT;
         public static int WINDOW_WIDTH = ScreenManager.WINDOW_WIDTH;
 
-        private static Rectangle[] buttons = new Rectangle[4];
+        private readonly Rectangle[] buttons = new Rectangle[4];
 
-        static float startPoint = WINDOW_WIDTH * 0.2f;
-        static float buttonAreaWidth = WINDOW_WIDTH * 0.6f;
-        static int heightPoint = (int)(WINDOW_HEIGHT * 0.6f);
+        readonly float startPoint = WINDOW_WIDTH * 0.2f;
+        readonly static float buttonAreaWidth = WINDOW_WIDTH * 0.6f;
+        readonly int heightPoint = (int)(WINDOW_HEIGHT * 0.6f);
 
-        static int buttonWidth = (int)(buttonAreaWidth * 0.2f);
-        static int buttonHeight = (int)(WINDOW_HEIGHT * 0.05f);
+        readonly int buttonWidth = (int)(buttonAreaWidth * 0.2f);
+        readonly int buttonHeight = (int)(WINDOW_HEIGHT * 0.05f);
 
         public override void LoadAssets()
         {
@@ -33,7 +33,7 @@ namespace StockSimulator
             {
                 buttons[i] = new Rectangle((int)start, heightPoint, buttonWidth, buttonHeight);
 
-                start += buttonWidth * 1.25f;
+                start += (int)(buttonWidth * 1.25f);
             }
 
             base.LoadAssets();
@@ -47,31 +47,40 @@ namespace StockSimulator
         public override void Update(GameTime gameTime)
         {
             mouseState = Mouse.GetState();
-            int button = -1;
-            
-            for(int i = 0; i < 4; i++)
-            {
-                if(buttons[i].Contains(mouseState.Position))
-                {
-                    button = i;
-                }
-            }
+            int choice = -1;
 
-            if (mouseState.LeftButton == ButtonState.Pressed && button != -1) //check if mouse is pressed and is inside a button
+            if (mouseState.LeftButton == ButtonState.Pressed) //check if mouse is pressed and is inside a button
             {
-                switch(button)
+                float start = startPoint;
+                for (int i = 0; i < 4; i++)
                 {
-                    case 0: //campaign
-                        break;
-                    case 1: //sandbox
-                        ScreenManager.AddScreen(new PlayScreen());
-                        break;
-                    case 2: //load game
-                        OpenFile();
-                        break;
-                    case 3: //exit
-                        ScreenManager.RemoveScreen(this);
-                        break;
+                    Rectangle area = new Rectangle((int)start, heightPoint, buttonWidth, buttonHeight);
+                    start += (int)(buttonWidth * 1.25f);
+
+                    if (area.Contains(mouseState.Position))
+                    {
+                        choice = i;
+                    }
+                }
+                if (choice != -1)
+                {
+                    switch (choice)
+                    {
+                        case 0: //campaign
+                            ScreenManager.RemoveScreen(this);
+                            break;
+                        case 1: //sandbox
+                            //ScreenManager.RemoveScreen(this);
+                            ScreenManager.AddScreen(new PlayScreen());
+                            break;
+                        case 2: //load game
+                            ScreenManager.RemoveScreen(this);
+                            //OpenFile();
+                            break;
+                        case 3: //exit
+                            ScreenManager.RemoveScreen(this);
+                            break;
+                    }
                 }
             }
 
@@ -82,11 +91,15 @@ namespace StockSimulator
         {
             spriteBatch.Begin();
 
+            MouseState mouseState = Mouse.GetState();
+            Graphing.DrawString(spriteBatch, f_120, (mouseState.X + ", " + mouseState.Y), new Vector2(0, 0), Color.Black, 1f, 0);
+
             Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
             t.SetData(new[] { Color.Maroon });
 
             DrawTitle();
-            DrawButtons(t);
+            DrawButton();
+            DrawButtonText();
 
             spriteBatch.End();
 
@@ -99,48 +112,44 @@ namespace StockSimulator
             Graphing.DrawString(spriteBatch, f_120, "StockSimulator", new Vector2(start, WINDOW_HEIGHT * 0.15f), Color.Maroon, 1f, 0);
         }
 
-        private void DrawButtons(Texture2D t)
+        private void DrawButton()
         {
+            foreach (Rectangle rectangle in buttons)
+            {
+                Color[] data = new Color[rectangle.Width * rectangle.Height];
+                Texture2D rectTexture = new Texture2D(GraphicsDevice, rectangle.Width, rectangle.Height);
+
+                for (int i = 0; i < data.Length; ++i)
+                    data[i] = Color.Maroon;
+
+                rectTexture.SetData(data);
+                var position = new Vector2(rectangle.Left, rectangle.Top);
+
+                spriteBatch.Draw(rectTexture, position, Color.Maroon);
+            }
+        }
+
+        private void DrawButtonText()
+        {
+            float start = startPoint;
+
             string[] labels = { "Campaign", "Sandbox", "Load Game", "Exit Game" };
             for (int i = 0; i < 4; i++)
             {
-                spriteBatch.Draw(t, buttons[i], Color.Maroon);
-
-
                 Vector2 textSize = f_120.MeasureString(labels[i]) / 10f;
-                float x = ((buttonWidth - textSize.X) / 2) + startPoint;
+                float x = ((buttonWidth - textSize.X) / 2) + start;
                 float y = ((buttonHeight - textSize.Y) / 2) + heightPoint;
                 Vector2 textStart = new Vector2(x, y);
 
                 Graphing.DrawString(spriteBatch, f_120, labels[i], textStart, Color.White, 0.1f, 0);
 
-                startPoint += buttonWidth * 1.25f;
+                start += buttonWidth * 1.25f;
             }
-
-
-            //float startPoint = WINDOW_WIDTH * 0.2f;
-            //float buttonAreaWidth = WINDOW_WIDTH * 0.6f;
-            //int buttonWidth = (int)(buttonAreaWidth * 0.2f);
-            //int buttonHeight = (int)(WINDOW_HEIGHT * 0.05f);
-            //int heightPoint = (int)(WINDOW_HEIGHT * 0.6f);
-
-            //for (int i = 0; i < 4; i++)
-            //{
-            //    spriteBatch.Draw(t, new Rectangle((int)startPoint, heightPoint, buttonWidth, buttonHeight), Color.Maroon);
-            //    Vector2 textSize = f_120.MeasureString(labels[i]) / 10f;
-            //    Vector2 textStart = new Vector2(((buttonWidth - textSize.X) / 2) + startPoint, ((buttonHeight - textSize.Y) / 2) + heightPoint);
-
-            //    DrawString(spriteBatch, f_120, labels[i], textStart, Color.White, 0.1f, 0);
-
-            //    startPoint += buttonWidth * 1.25f;
-            //}
         }
 
         private void OpenFile()
         {
-#if WINDOWS
-            //openfiledialog?
-#endif
+            //nothing yet
         }
     }
 }
