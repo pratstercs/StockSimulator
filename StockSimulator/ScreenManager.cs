@@ -25,6 +25,9 @@ namespace StockSimulator
 
         GameState state = GameState.MainMenu;
 
+        /// <summary>
+        /// Constructor. Sets up the window properties
+        /// </summary>
         public ScreenManager()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -40,6 +43,9 @@ namespace StockSimulator
             graphics.ApplyChanges();
         }
 
+        /// <summary>
+        /// Performs inital code
+        /// </summary>
         protected override void Initialize()
         {
             graphicsDevice = base.GraphicsDevice;
@@ -49,10 +55,12 @@ namespace StockSimulator
             base.Initialize();
         }
 
+        /// <summary>
+        /// Loads global assets such as fonts and starts MainMenu screen
+        /// </summary>
         protected override void LoadContent()
         {
             ContentMgr = Content;
-            spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // Load any full game assets here
             spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -61,6 +69,9 @@ namespace StockSimulator
             AddScreen(new MainMenu());
         }
 
+        /// <summary>
+        /// Exiting code, frees memory and closes everything in turn
+        /// </summary>
         protected override void UnloadContent()
         {
             foreach (var screen in ScreenList)
@@ -71,6 +82,11 @@ namespace StockSimulator
             Content.Unload();
         }
 
+        /// <summary>
+        /// Allows the game to run logic such as updating the world,
+        /// checking for collisions, gathering input, and playing audio.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
             if (ScreenList.Count < 1)
@@ -104,6 +120,10 @@ namespace StockSimulator
             }
         }
 
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
             var startIndex = ScreenList.Count - 1;
@@ -127,6 +147,10 @@ namespace StockSimulator
             base.Draw(gameTime);
         }
 
+        /// <summary>
+        /// Adds a new game screen to the stack
+        /// </summary>
+        /// <param name="gameScreen">The new screen to add</param>
         public static void AddScreen(GameScreen gameScreen)
         {
             if (ScreenList == null)
@@ -137,12 +161,21 @@ namespace StockSimulator
             gameScreen.LoadAssets();
         }
 
+        /// <summary>
+        /// Closes a gameScreen from the stack and frees up any memory from it
+        /// </summary>
+        /// <param name="gameScreen">The screen to remove</param>
         public static void RemoveScreen(GameScreen gameScreen)
         {
             gameScreen.UnloadAssets();
             ScreenList.Remove(gameScreen);
         }
 
+        /// <summary>
+        /// Switches the focus from one gameScreen to another
+        /// </summary>
+        /// <param name="currentScreen">The screen to switch from</param>
+        /// <param name="targetScreen">The screen to switch to</param>
         public static void ChangeScreens(GameScreen currentScreen, GameScreen targetScreen)
         {
             RemoveScreen(currentScreen);

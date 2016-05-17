@@ -20,6 +20,10 @@ namespace StockSimulator
 
         float tickerScroll = 0;
 
+        /// <summary>
+        /// Load what is required for PlayScreen
+        /// Sets background color and configures the GameLogic object with the stock data required
+        /// </summary>
         public override void LoadAssets()
         {
             BackgroundColor = Color.LightGray;
@@ -35,6 +39,10 @@ namespace StockSimulator
             base.LoadAssets();
         }
 
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public override void Draw(GameTime gameTime)
         {
             spriteBatch.Begin();
@@ -75,6 +83,9 @@ namespace StockSimulator
             base.Draw(gameTime);
         }
 
+        /// <summary>
+        /// Draws the wallet box and stats in the bottom left corner
+        /// </summary>
         private void drawWalletBox()
         {
             //---Draw Box
@@ -152,6 +163,11 @@ namespace StockSimulator
             Graphing.DrawString(spriteBatch, f_120, change, changeStart, colour, 0.125f, 0);
         }
 
+        /// <summary>
+        /// Allows the game to run logic such as updating the world,
+        /// checking for collisions, gathering input, and playing audio.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public override void Update(GameTime gameTime)
         {
             tickerScroll = (tickerScroll + 1) % WINDOW_WIDTH;
