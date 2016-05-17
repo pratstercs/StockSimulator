@@ -9,6 +9,7 @@ namespace StockSimulator
         SpriteBatch spriteBatch = ScreenManager.spriteBatch;
         SpriteFont f_120 = ScreenManager.f_120;
         GraphicsDevice GraphicsDevice = ScreenManager.graphicsDevice;
+        MouseState mouseState;
 
         public static int WINDOW_HEIGHT = ScreenManager.WINDOW_HEIGHT;
         public static int WINDOW_WIDTH = ScreenManager.WINDOW_WIDTH;
@@ -17,10 +18,10 @@ namespace StockSimulator
 
         static float startPoint = WINDOW_WIDTH * 0.2f;
         static float buttonAreaWidth = WINDOW_WIDTH * 0.6f;
-        static int buttonWidth = (int)(buttonAreaWidth * 0.2f);
-
-        static int buttonHeight = (int)(WINDOW_HEIGHT * 0.05f);
         static int heightPoint = (int)(WINDOW_HEIGHT * 0.6f);
+
+        static int buttonWidth = (int)(buttonAreaWidth * 0.2f);
+        static int buttonHeight = (int)(WINDOW_HEIGHT * 0.05f);
 
         public override void LoadAssets()
         {
@@ -45,9 +46,30 @@ namespace StockSimulator
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            mouseState = Mouse.GetState();
+            int button = -1;
+            
+            for(int i = 0; i < 4; i++)
             {
-                //input handling
+                if(buttons[i].Contains(mouseState.Position))
+                {
+                    button = i;
+                }
+            }
+
+            if (mouseState.LeftButton == ButtonState.Pressed && button != -1) //check if mouse is pressed and is inside a button
+            {
+                switch(button)
+                {
+                    case 0: //campaign
+                        break;
+                    case 1: //sandbox
+                        break;
+                    case 2: //load game
+                        break;
+                    case 3: //exit
+                        break;
+                }
             }
 
             base.Update(gameTime);
@@ -80,13 +102,35 @@ namespace StockSimulator
             for (int i = 0; i < 4; i++)
             {
                 spriteBatch.Draw(t, buttons[i], Color.Maroon);
+
+
                 Vector2 textSize = f_120.MeasureString(labels[i]) / 10f;
-                Vector2 textStart = new Vector2(((buttonWidth - textSize.X) / 2) + startPoint, ((buttonHeight - textSize.Y) / 2) + heightPoint);
+                float x = ((buttonWidth - textSize.X) / 2) + startPoint;
+                float y = ((buttonHeight - textSize.Y) / 2) + heightPoint;
+                Vector2 textStart = new Vector2(x, y);
 
                 Graphing.DrawString(spriteBatch, f_120, labels[i], textStart, Color.White, 0.1f, 0);
 
                 startPoint += buttonWidth * 1.25f;
             }
+
+
+            //float startPoint = WINDOW_WIDTH * 0.2f;
+            //float buttonAreaWidth = WINDOW_WIDTH * 0.6f;
+            //int buttonWidth = (int)(buttonAreaWidth * 0.2f);
+            //int buttonHeight = (int)(WINDOW_HEIGHT * 0.05f);
+            //int heightPoint = (int)(WINDOW_HEIGHT * 0.6f);
+
+            //for (int i = 0; i < 4; i++)
+            //{
+            //    spriteBatch.Draw(t, new Rectangle((int)startPoint, heightPoint, buttonWidth, buttonHeight), Color.Maroon);
+            //    Vector2 textSize = f_120.MeasureString(labels[i]) / 10f;
+            //    Vector2 textStart = new Vector2(((buttonWidth - textSize.X) / 2) + startPoint, ((buttonHeight - textSize.Y) / 2) + heightPoint);
+
+            //    DrawString(spriteBatch, f_120, labels[i], textStart, Color.White, 0.1f, 0);
+
+            //    startPoint += buttonWidth * 1.25f;
+            //}
         }
     }
 }
