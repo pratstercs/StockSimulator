@@ -582,6 +582,53 @@ namespace StockSimulator
         /// Method to read a MetaStock formatted file and add the data to the specified Exchange
         /// </summary>
         /// <param name="path">The full path to the file to add</param>
+        /// <returns>A GameLogic object set up by the save file</returns>
+        public static GameLogic readSaveFile(string path)
+        {
+            string symbol = "";
+            using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (BufferedStream bs = new BufferedStream(fs))
+            using (StreamReader sr = new StreamReader(bs))
+            {
+                string line;
+
+                if ((line = sr.ReadLine()) == null) //read first line and test if not-null
+                {
+                    return null; //if first line is null
+                }
+                else
+                {
+                    DateTime date = DateTime.Parse(line);
+                    sr.ReadLine();
+
+                    if (line[0] == '<') //test if header row is present
+                    {
+                        if ((line = sr.ReadLine()) == null)
+                        {
+                            return null; //if header row is present and next row is null, return as no data to process
+                        }
+                    }
+
+                    Exchange ex = new Exchange();
+
+                    //get stock symbol and ensure ticker is ready
+                    symbol = line.Split(',')[0];
+                    ex.Add(symbol);
+
+                    do
+                    {
+                        ex[symbol].AddDay(line); //add lines while there are lines to add
+                    } while ((line = sr.ReadLine()) != null);
+
+                    return new GameLogic(ex, date);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Method to read a MetaStock formatted file and add the data to the specified Exchange
+        /// </summary>
+        /// <param name="path">The full path to the file to add</param>
         /// <param name="ex">The Exchange for the data to be added to</param>
         public static void readFile(string path, Exchange ex)
         {
@@ -623,8 +670,9 @@ namespace StockSimulator
         /// </summary>
         /// <param name="path">The path of the file to write to</param>
         /// <param name="ex">The exchange to save</param>
-        public static void writeExchangeToFile(string path, Exchange ex)
+        public static void writeExchangeToFile(string path, GameLogic gl)
         {
+            string date = gl.CurrentDate.ToString();
             string header = "<ticker>,<date>,<open>,<high>,<low>,<close>,<vol>";
 
             File.WriteAllText(path, string.Empty); //ensures file is empty before writing
@@ -632,15 +680,16 @@ namespace StockSimulator
             using (FileStream fs = File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
             using (StreamWriter sw = new StreamWriter(new BufferedStream(fs)))
             {
+                sw.WriteLine(date);
                 sw.WriteLine(header);
 
-                foreach (KeyValuePair<string, Ticker> t in ex)
+                foreach (KeyValuePair<string, Ticker> t in gl.ex)
                 { //iterate through symbols in exchnage
                     string symbol = t.Key;
 
                     foreach (KeyValuePair<DateTime, StockRow> sr in t.Value)
                     { //iterate through each day's data for each symbol
-                        string date = sr.Key.ToString("yyyyMMdd");
+                        string dte = sr.Key.ToString("yyyyMMdd");
 
                         string high = sr.Value.high.ToString(); //convert to string from decimal
                         string low = sr.Value.low.ToString();
@@ -648,7 +697,7 @@ namespace StockSimulator
                         string close = sr.Value.close.ToString();
                         string volume = sr.Value.volume.ToString();
 
-                        string toWrite = symbol + "," + date + "," + open + "," + high + "," + low + "," + close + "," + volume;
+                        string toWrite = symbol + "," + dte + "," + open + "," + high + "," + low + "," + close + "," + volume;
 
                         sw.WriteLine(toWrite);
                     }

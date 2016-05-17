@@ -64,10 +64,13 @@ namespace StockSimulator
                     case 0: //campaign
                         break;
                     case 1: //sandbox
+                        ScreenManager.AddScreen(new PlayScreen());
                         break;
                     case 2: //load game
+                        OpenFile();
                         break;
                     case 3: //exit
+                        ScreenManager.RemoveScreen(this);
                         break;
                 }
             }
@@ -131,6 +134,13 @@ namespace StockSimulator
 
             //    startPoint += buttonWidth * 1.25f;
             //}
+        }
+
+        private void OpenFile()
+        {
+#if WINDOWS
+            //openfiledialog?
+#endif
         }
     }
 }

@@ -73,9 +73,11 @@ namespace StockSimulator
 
         protected override void Update(GameTime gameTime)
         {
+            if (ScreenList.Count < 1)
+                Exit();
+
             try
             {
-                // TODO Remove temp code
                 if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 {
                     Exit();
@@ -94,7 +96,7 @@ namespace StockSimulator
             catch (Exception ex)
             {
                 // ErrorLog.AddError(ex);
-                throw ex;
+                //throw ex;
             }
             finally
             {
@@ -105,17 +107,20 @@ namespace StockSimulator
         protected override void Draw(GameTime gameTime)
         {
             var startIndex = ScreenList.Count - 1;
-            while (ScreenList[startIndex].IsPopup)
+            if (startIndex != -1)
             {
-                startIndex--;
-            }
+                while (ScreenList[startIndex].IsPopup)
+                {
+                    startIndex--;
+                }
 
-            GraphicsDevice.Clear(ScreenList[startIndex].BackgroundColor);
-            graphics.GraphicsDevice.Clear(ScreenList[startIndex].BackgroundColor);
+                GraphicsDevice.Clear(ScreenList[startIndex].BackgroundColor);
+                graphics.GraphicsDevice.Clear(ScreenList[startIndex].BackgroundColor);
 
-            for (var i = startIndex; i < ScreenList.Count; i++)
-            {
-                ScreenList[i].Draw(gameTime);
+                for (var i = startIndex; i < ScreenList.Count; i++)
+                {
+                    ScreenList[i].Draw(gameTime);
+                }
             }
 
 
@@ -136,8 +141,6 @@ namespace StockSimulator
         {
             gameScreen.UnloadAssets();
             ScreenList.Remove(gameScreen);
-            if (ScreenList.Count < 1)
-                AddScreen(new MainMenu());
         }
 
         public static void ChangeScreens(GameScreen currentScreen, GameScreen targetScreen)
