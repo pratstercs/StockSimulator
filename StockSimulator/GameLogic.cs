@@ -42,13 +42,17 @@ namespace StockSimulator
                     currentDate = currentDate.AddMonths(-1);
                 }
 
+        /// <summary>
+        /// Constructor for an empty exchange but a specified start date
+        /// </summary>
+        /// <param name="date">The date to start on</param>
+        /// <param name="money">Starting cash</param>
         public GameLogic(DateTime date, decimal money)
         {
             ex = new Exchange();
             currentDate = date;
             cash = money;
         }
-
 
         /// <summary>
         /// Constructor for pre-configured scenario

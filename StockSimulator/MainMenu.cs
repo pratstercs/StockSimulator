@@ -87,6 +87,10 @@ namespace StockSimulator
             base.Update(gameTime);
         }
 
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public override void Draw(GameTime gameTime)
         {
             spriteBatch.Begin();
@@ -106,12 +110,18 @@ namespace StockSimulator
             base.Draw(gameTime);
         }
 
+        /// <summary>
+        /// Draws the StockSimulator title
+        /// </summary>
         private void DrawTitle()
         {
             float start = (WINDOW_WIDTH - f_120.MeasureString("StockSimulator").X) / 2;
             Graphing.DrawString(spriteBatch, f_120, "StockSimulator", new Vector2(start, WINDOW_HEIGHT * 0.15f), Color.Maroon, 1f, 0);
         }
 
+        /// <summary>
+        /// Draws the background of the menu buttons
+        /// </summary>
         private void DrawButton()
         {
             foreach (Rectangle rectangle in buttons)
@@ -129,6 +139,9 @@ namespace StockSimulator
             }
         }
 
+        /// <summary>
+        /// Draws the button text
+        /// </summary>
         private void DrawButtonText()
         {
             float start = startPoint;
