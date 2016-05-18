@@ -358,6 +358,11 @@ namespace StockSimulator
 
             float[] toReturn = { graphHeight, graphWidth, (width - graphWidth + Xstart), (Ystart), (float)extremes[1], (float)extremes[0] };
 
+            Rectangle bg = new Rectangle((int)Xstart, (int)Ystart, (int)width, (int)height);
+            t.SetData<Color>(new Color[] { Color.White });
+
+            sb.Draw(t, bg, Color.White);
+
             drawMainMargins(sb, t, height, width, Xstart, Ystart);
             drawMinorMargins(sb, t, graphHeight, graphWidth, Xstart + maxLeftWidth, Ystart);
             drawGridlines(sb, t, graphHeight, Xstart + maxLeftWidth, Ystart, Xstart + width);
