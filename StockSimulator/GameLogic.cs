@@ -17,6 +17,7 @@ namespace StockSimulator
         public List<Stock> wallet = new List<Stock>(); // { get; private set; }
         public decimal cash; // { get; private set; }
         public Dictionary<string,StockChange> changes = new Dictionary<string, StockChange>();
+        public Dictionary<string, string> names = new Dictionary<string, string>();
 
         public DateTime currentDate;
         public DateTime CurrentDate
@@ -295,6 +296,25 @@ namespace StockSimulator
                 getChange(str);
             }
         }
+
+        public string getName(string symbol)
+        {
+            try
+            {
+                return names[symbol];
+            }
+            catch
+            {
+                string name = WebInterface.getName(symbol);
+                names.Add(symbol, name);
+                return name;
+            }
+        }
+
+        public StockRow getValues(string symbol, DateTime date)
+        {
+            return ex[symbol][date];
+        }
     }
     
 
@@ -303,6 +323,38 @@ namespace StockSimulator
     /// </summary>
     public static class Utilities
     {
+        /// <summary>
+        /// Method to find text between two strings
+        /// Method from Oscar Jara, Stack Overflow: http://stackoverflow.com/a/10709874/1188467
+        /// </summary>
+        /// <param name="strSource"></param>
+        /// <param name="strStart"></param>
+        /// <param name="strEnd"></param>
+        /// <returns></returns>
+        public static string getBetween(string strSource, string strStart, string strEnd)
+        {
+            int Start, End;
+            if (strSource.Contains(strStart) && strSource.Contains(strEnd))
+            {
+                Start = strSource.IndexOf(strStart, 0) + strStart.Length;
+                End = strSource.IndexOf(strEnd, Start);
+                return strSource.Substring(Start, End - Start);
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        public static string getName(string source, string sym)
+        {
+            string symbol = " (" + sym + ")";
+            int end;
+
+            end = source.IndexOf(symbol, 0);
+            return source.Substring(0, end);
+        }
+
         /// <summary>
         /// Method to query the API for new percentage changes
         /// </summary>
@@ -576,6 +628,28 @@ namespace StockSimulator
             {
                 data = new WebClient().DownloadString(url);
                 return data;
+            }
+            catch (WebException e)
+            {
+                Console.Write(e.ToString());
+                return null;
+            }
+        }
+
+        public static string getName(string symbol)
+        {
+            string data = "";
+
+            string url = "https://www.quandl.com/api/v3/datasets/WIKI/" + symbol + "/metadata.xml?api_key=VAjcx6n-wo8WLqb6VD-p";
+
+            try
+            {
+                data = new WebClient().DownloadString(url);
+
+                string fullName = Utilities.getBetween(data, "<name>", "</name>");
+                string name = Utilities.getName(fullName, symbol);
+
+                return name;
             }
             catch (WebException e)
             {
