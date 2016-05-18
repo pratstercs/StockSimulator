@@ -462,11 +462,12 @@ namespace StockSimulator
         /// <param name="Xstart">The x (horizontal) co-ord to start from</param>
         private static void drawBottomAxisLabels(SpriteBatch sb, SpriteFont font, string[] labels, float width, float height, float Xstart)
         {
-            float spacing = width / 10;
+            float spacing = width / 11;
 
             for (int i = 0; i < 11; i++)
             {
-                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart + (spacing * i), height), Color.Black, 0.1f, -45);
+                float center = font.MeasureString(labels[i]).X / (2 * 10f);
+                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart + (spacing * i) - center, height), Color.Black, 0.1f, -45);
             }
         }
 

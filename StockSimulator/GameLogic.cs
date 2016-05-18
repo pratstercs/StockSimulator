@@ -509,9 +509,9 @@ namespace StockSimulator
             for(int i = 0; i < 10; i++)
             {
                 decimal value = extremes[1] + (i * leftSpacing); //minimum + i tenths of the difference
-                toReturn[0][i] = ((int)value).ToString();
+                toReturn[0][i] = (value).ToString("N1");
             }
-            toReturn[0][10] = ((int)extremes[0]).ToString();
+            toReturn[0][10] = (extremes[0]).ToString("N1");
 
             //bottom axis labels
             float rightSpacing = ((float)dates.Count() / 10f);
