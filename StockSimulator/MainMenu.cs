@@ -67,7 +67,7 @@ namespace StockSimulator
                     switch (choice)
                     {
                         case 0: //campaign
-                            ScreenManager.RemoveScreen(this);
+                            startCampaign1();
                             break;
                         case 1: //sandbox
                             //loadingString();
@@ -85,6 +85,20 @@ namespace StockSimulator
             }
 
             base.Update(gameTime);
+        }
+
+        private void startCampaign1()
+        {
+            System.DateTime date = System.DateTime.Now.Date.AddYears(-1);
+            GameLogic gl = new GameLogic(date, 100000M);
+
+            string[] symbols = { "JPM", "C", "AXP" };
+            foreach(string s in symbols)
+            {
+                gl.getData(s, date.ToString("yyyyMMdd"), date.AddYears(1).ToString("yyyyMMdd"));
+            }
+
+            ScreenManager.AddScreen(new PlayScreen(gl));
         }
 
         /// <summary>
