@@ -30,3 +30,9 @@
 /processorParam:TextureFormat=Compressed
 /build:f_120.spritefont
 
+#begin f_30.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=Compressed
+/build:f_30.spritefont
+
