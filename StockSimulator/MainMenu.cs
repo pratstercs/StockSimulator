@@ -70,7 +70,7 @@ namespace StockSimulator
                             ScreenManager.RemoveScreen(this);
                             break;
                         case 1: //sandbox
-                            //ScreenManager.RemoveScreen(this);
+                            //loadingString();
                             ScreenManager.AddScreen(new PlayScreen());
                             break;
                         case 2: //load game
@@ -95,15 +95,14 @@ namespace StockSimulator
         {
             spriteBatch.Begin();
 
-            MouseState mouseState = Mouse.GetState();
-            Graphing.DrawString(spriteBatch, f_120, (mouseState.X + ", " + mouseState.Y), new Vector2(0, 0), Color.Black, 1f, 0);
-
             Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
             t.SetData(new[] { Color.Maroon });
 
             DrawTitle();
             DrawButton();
             DrawButtonText();
+
+            //loadingString();
 
             spriteBatch.End();
 
@@ -124,18 +123,24 @@ namespace StockSimulator
         /// </summary>
         private void DrawButton()
         {
+            Color[] colours = { Color.DarkGray, Color.Maroon };
+            int j = 0;
+
             foreach (Rectangle rectangle in buttons)
             {
                 Color[] data = new Color[rectangle.Width * rectangle.Height];
                 Texture2D rectTexture = new Texture2D(GraphicsDevice, rectangle.Width, rectangle.Height);
 
-                for (int i = 0; i < data.Length; ++i)
-                    data[i] = Color.Maroon;
+                for (int i = 0; i < data.Length; i++)
+                {
+                    data[i] = colours[j % colours.Length];
+                }
 
                 rectTexture.SetData(data);
                 var position = new Vector2(rectangle.Left, rectangle.Top);
 
-                spriteBatch.Draw(rectTexture, position, Color.Maroon);
+                spriteBatch.Draw(rectTexture, position, colours[j % colours.Length]);
+                j++;
             }
         }
 
@@ -158,6 +163,15 @@ namespace StockSimulator
 
                 start += buttonWidth * 1.25f;
             }
+        }
+
+        private void loadingString()
+        {
+            string str = "Loading...";
+            Vector2 size = f_120.MeasureString(str);
+            Vector2 start = new Vector2((WINDOW_WIDTH - size.X) / 2, (WINDOW_HEIGHT - size.Y) / 2);
+
+            Graphing.DrawString(spriteBatch, f_120, str, start, Color.Black, 1f, 0);
         }
 
         private void OpenFile()
