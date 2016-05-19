@@ -19,11 +19,10 @@ namespace StockSimulator
 
         public static GameLogic gl;
         public static SpriteFont f_120;
+        public static SpriteFont f_30;
 
         public static int WINDOW_HEIGHT = 768;
         public static int WINDOW_WIDTH = 1366;
-
-        GameState state = GameState.MainMenu;
 
         /// <summary>
         /// Constructor. Sets up the window properties
@@ -65,6 +64,7 @@ namespace StockSimulator
             // Load any full game assets here
             spriteBatch = new SpriteBatch(GraphicsDevice);
             f_120 = Content.Load<SpriteFont>("f_120");
+            f_30 = Content.Load<SpriteFont>("f_30");
 
             AddScreen(new MainMenu());
         }
@@ -111,6 +111,7 @@ namespace StockSimulator
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 // ErrorLog.AddError(ex);
                 //throw ex;
             }
