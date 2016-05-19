@@ -320,7 +320,7 @@ namespace StockSimulator
 
             float[] floats = System.Array.ConvertAll(data, x => (float)x); //convert decimals to floats
 
-            float space = (float)(width / (double)data.Length); //get horizontal spacing between points
+            float space = (float)(width / (double)(data.Length - 1)); //get horizontal spacing between points
 
             for (int i = 0; i < floats.Length; i++)
             {
