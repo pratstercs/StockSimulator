@@ -295,11 +295,11 @@ namespace StockSimulator
         {
             Vector2 prevPoint = new Vector2(data[0].X, data[0].Y); //set initial "previous point" to the first point in the dataset
 
+            Texture2D t = new Texture2D(g, 1, 1);
+            t.SetData(new[] { color });
+
             foreach (Vector2 point in data)
             {
-                Texture2D t = new Texture2D(g, 1, 1);
-                t.SetData(new[] { color });
-
                 drawLine(t, sb, color, prevPoint, point, 3);
                 prevPoint = point;
             }

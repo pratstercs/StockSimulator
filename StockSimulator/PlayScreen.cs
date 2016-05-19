@@ -39,8 +39,7 @@ namespace StockSimulator
 
         bool input = false;
 
-        DateTime now;
-        DateTime old;
+        DateTime start, end;
 
         LinkedList<KeyValuePair<string, string>> ticker = new LinkedList<KeyValuePair<string, string>>();
 
@@ -48,6 +47,7 @@ namespace StockSimulator
         public static int WINDOW_WIDTH = ScreenManager.WINDOW_WIDTH;
 
         float tickerScroll = 0;
+        int graphWeeks = 52;
 
         public PlayScreen()
         {
@@ -66,14 +66,14 @@ namespace StockSimulator
         {
             BackgroundColor = Color.LightGray;
 
-            now = new DateTime(2015, 11, 4);
-            old = new DateTime(2015, 5, 4);
-            //old = now.AddYears(-1);
+            start = new DateTime(2014, 5, 5);
+            DateTime dateToStart = new DateTime(2015, 5, 5);
+            end = new DateTime(2016, 5, 2);
 
-            gl = new GameLogic(old, 100000M);
+            gl = new GameLogic(dateToStart, 100000M);
 
-            gl.getData("C", old.ToString("yyyyMMdd"), now.ToString("yyyyMMdd"));
-            gl.getData("JPM", old.ToString("yyyyMMdd"), now.ToString("yyyyMMdd"));
+            gl.getData("C", start.ToString("yyyyMMdd"), end.ToString("yyyyMMdd"));
+            gl.getData("JPM", start.ToString("yyyyMMdd"), end.ToString("yyyyMMdd"));
 
             var symbols = from entry in gl.ex.Keys orderby entry ascending select entry;
             stocks = new string[symbols.Count()];
@@ -102,7 +102,7 @@ namespace StockSimulator
             drawDateBox();
             DrawTicker();
             drawPlayBox();
-            DrawGraph();
+            DrawGraph(graphWeeks);
 
             spriteBatch.End();
 
@@ -377,11 +377,12 @@ namespace StockSimulator
         /// <summary>
         /// Method to draw the a stock graph
         /// </summary>
-        private void DrawGraph()
+        private void DrawGraph(int weeks)
         {
-            DateTime[] dates = gl.getStockDates(selectedStock, old, now);
+            DateTime endDate = gl.CurrentDate;
+            DateTime[] dates = gl.getStockDates(selectedStock, endDate.AddDays(-7*weeks), endDate);
 
-            decimal[][] data = gl.getStockDataByDay(selectedStock, old, now);
+            decimal[][] data = gl.getStockDataByDay(selectedStock, endDate.AddDays(-7 * weeks), endDate);
             Color[] colours = { Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
             Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
             float[] values = Graphing.initialiseGraph(spriteBatch, t, f_120, data, dates, graphHeight, graphWidth, graphXStart, graphYStart); //draw basics of graph and calculate actual plot area excluding margins, etc
@@ -488,7 +489,7 @@ namespace StockSimulator
             }
 
             selectedStock = stocks[stockNumber];
-            price = gl.getValues(selectedStock, now).close;
+            price = gl.getValues(selectedStock, gl.CurrentDate).close;
 
             base.Update(gameTime);
         }
