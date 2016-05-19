@@ -13,7 +13,6 @@ namespace StockSimulator
         SpriteFont f_30 = ScreenManager.f_30;
         GraphicsDevice GraphicsDevice = ScreenManager.graphicsDevice;
         MouseState mouseState;
-        MouseState oldMouseState;
 
         public static int WINDOW_HEIGHT = ScreenManager.WINDOW_HEIGHT;
         public static int WINDOW_WIDTH = ScreenManager.WINDOW_WIDTH;
@@ -23,6 +22,8 @@ namespace StockSimulator
         float dateCol, nameCol, priceCol, amtCol, valCol;
         float dateStart, nameStart, priceStart, amtStart, valStart;
         float textHeight;
+
+        Rectangle exit;
 
         GameLogic gl;
 
@@ -93,6 +94,13 @@ namespace StockSimulator
                 string amtStr = amount.ToString("N0");
                 string valStr = "$" + (price * amount).ToString("N2");
 
+                float fullNameScale = 0.75f;
+                float fullNameWidth = f_30.MeasureString(fullName).X * 0.75f;
+                if(fullNameWidth > nameCol) //handling too long company names
+                {
+                    fullNameScale = nameCol / fullNameWidth * 0.75f;
+                }
+
                 Vector2 dateS = new Vector2(dateStart + ((dateCol - f_30.MeasureString(date).X) / 2), currentHeight);
                 Vector2 nameS = new Vector2(nameStart + ((nameCol - f_30.MeasureString(fullName).X) / 2), currentHeight);
                 Vector2 priceS = new Vector2(priceStart + ((priceCol - f_30.MeasureString(priceStr).X) / 2), currentHeight);
@@ -100,7 +108,7 @@ namespace StockSimulator
                 Vector2 valueS = new Vector2(valStart + ((valCol - f_30.MeasureString(valStr).X) / 2), currentHeight);
 
                 Graphing.DrawString(spriteBatch, f_30, date, dateS, Color.Black, 0.75f, 0);
-                Graphing.DrawString(spriteBatch, f_30, fullName, nameS, Color.Black, 0.75f, 0);
+                Graphing.DrawString(spriteBatch, f_30, fullName, nameS, Color.Black, fullNameScale, 0);
                 Graphing.DrawString(spriteBatch, f_30, priceStr, priceS, Color.Black, 0.75f, 0);
                 Graphing.DrawString(spriteBatch, f_30, amtStr, amountS, Color.Black, 0.75f, 0);
                 Graphing.DrawString(spriteBatch, f_30, valStr, valueS, Color.Black, 0.75f, 0);
@@ -108,9 +116,28 @@ namespace StockSimulator
                 currentHeight += textHeight * 1.1f;
             }
 
+            //Close
+            Vector2 exitSize = f_30.MeasureString("X");
+            exit = new Rectangle((int)(WINDOW_WIDTH - exitSize.X), 0, (int)exitSize.X, (int)exitSize.Y);
+            Graphing.DrawString(spriteBatch, f_30, "X", new Vector2(WINDOW_WIDTH - exitSize.X, 0), Color.Red, 1f, 0);
+
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            mouseState = Mouse.GetState();
+            if (mouseState.LeftButton == ButtonState.Pressed) //check if mouse is pressed and is inside a button
+            {
+                if(exit.Contains(mouseState.Position))
+                {
+                    ScreenManager.RemoveScreen(this);   
+                }
+            }
+
+                base.Update(gameTime);
         }
     }
 }
