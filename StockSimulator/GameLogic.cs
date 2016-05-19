@@ -200,14 +200,12 @@ namespace StockSimulator
         }
 
         /// <summary>
-        /// Method to increment the time to the next working hour
+        /// Method to increment the time by the hours from testWorkingDay
         /// </summary>
         public void incrementTime()
         {
             int hoursToIncrement = Utilities.testWorkingDay(currentDate);
             currentDate = currentDate.AddHours(hoursToIncrement);
-            currentDate = currentDate.AddMinutes(-currentDate.Minute);
-            currentDate = currentDate.AddSeconds(-currentDate.Second);
         }
 
         /// <summary>
@@ -297,6 +295,11 @@ namespace StockSimulator
             }
         }
 
+        /// <summary>
+        /// Method to get a company name and add it to the list if it isn't already there
+        /// </summary>
+        /// <param name="symbol">The symbol to get the name for</param>
+        /// <returns>The full company name</returns>
         public string getName(string symbol)
         {
             try
@@ -311,6 +314,12 @@ namespace StockSimulator
             }
         }
 
+        /// <summary>
+        /// Method to get the StockRow value for a symbol and date
+        /// </summary>
+        /// <param name="symbol">The stock to get</param>
+        /// <param name="date">The date's data to fetch</param>
+        /// <returns>The StockRow of the requested data</returns>
         public StockRow getValues(string symbol, DateTime date)
         {
             return ex[symbol][date];
@@ -346,6 +355,12 @@ namespace StockSimulator
             }
         }
 
+        /// <summary>
+        /// Method to split the name of the company from the full string containing name, symbol and stats available
+        /// </summary>
+        /// <param name="source">The full source string</param>
+        /// <param name="sym">The company's symbol</param>
+        /// <returns>The company name without any other stuff</returns>
         public static string getName(string source, string sym)
         {
             string symbol = " (" + sym + ")";
@@ -379,7 +394,9 @@ namespace StockSimulator
                 date = date.AddDays(-2);
             }
 
-            float change = (float)WebInterface.getChange(symbol, date.AddDays(reduce).ToString("yyyyMMdd"), date.ToString("yyyyMMdd"));
+            DateTime oldDate = date.AddDays(reduce);
+
+            float change = (float)WebInterface.getChange(symbol, oldDate.ToString("yyyyMMdd"), date.ToString("yyyyMMdd"));
 
             StockChange toReturn = new StockChange(symbol, change, dte);
 
@@ -474,7 +491,16 @@ namespace StockSimulator
 
             if (hour >= 9 && hour < 16)
             {
-                return 1;
+                switch (day)
+                {
+                    case DayOfWeek.Friday:
+                        return (24 + 24 + 24);
+                    case DayOfWeek.Saturday:
+                        return (24 + 24);
+                    case DayOfWeek.Sunday:
+                    default:
+                        return 24;
+                }
             }
             else if (hour >= 16)
             {
@@ -607,6 +633,13 @@ namespace StockSimulator
             return getData(url);
         }
 
+        /// <summary>
+        /// Method to get the percentage change of a stock between the two specified dates
+        /// </summary>
+        /// <param name="symbol">The stock to get the change for</param>
+        /// <param name="startDate">The start date of the change</param>
+        /// <param name="endDate">The end date of the change</param>
+        /// <returns></returns>
         public static double getChange(string symbol, string startDate, string endDate)
         {
             //format .../symbol/YYYYMMDD/YYYYMMDD/c
@@ -636,6 +669,11 @@ namespace StockSimulator
             }
         }
 
+        /// <summary>
+        /// Method to get the full name of the company with the specified symbol
+        /// </summary>
+        /// <param name="symbol">The symbol of the company</param>
+        /// <returns>The full name of that company</returns>
         public static string getName(string symbol)
         {
             string data = "";

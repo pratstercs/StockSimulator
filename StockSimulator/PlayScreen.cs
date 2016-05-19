@@ -22,11 +22,13 @@ namespace StockSimulator
         Rectangle leftArrow, rightArrow;
         Rectangle quantLeftArrow, quantRightArrow;
         Rectangle buyButton, sellButton;
+        Rectangle nextDay;
 
         int stockNumber = 0;
         string[] stocks;
         string selectedStock;
         decimal price = 0M;
+        string date = "";
 
         int quantity = 0;
 
@@ -34,6 +36,8 @@ namespace StockSimulator
         float graphYStart = 0;
         float graphHeight = 0;
         float graphWidth = 0;
+
+        bool input = false;
 
         DateTime now;
         DateTime old;
@@ -62,8 +66,8 @@ namespace StockSimulator
         {
             BackgroundColor = Color.LightGray;
 
-            now = new DateTime(2016, 6, 2);
-            old = new DateTime(2016, 5, 2);
+            now = new DateTime(2015, 11, 4);
+            old = new DateTime(2015, 5, 4);
             //old = now.AddYears(-1);
 
             gl = new GameLogic(old, 100000M);
@@ -81,6 +85,8 @@ namespace StockSimulator
             }
             selectedStock = stocks[stockNumber];
 
+            date = gl.currentDate.ToString("dd/MM/yyyy");
+
             base.LoadAssets();
         }
 
@@ -95,7 +101,7 @@ namespace StockSimulator
             drawWalletBox();
             drawDateBox();
             DrawTicker();
-            drawPlayBox(gameTime);
+            drawPlayBox();
             DrawGraph();
 
             spriteBatch.End();
@@ -103,14 +109,17 @@ namespace StockSimulator
             base.Draw(gameTime);
         }
 
-        private void drawPlayBox(GameTime gameTime)
+        /// <summary>
+        /// Method to draw the bottom left box
+        /// </summary>
+        private void drawPlayBox()
         {
             float sides = WINDOW_HEIGHT * (0.25f * 1.25f);
             float height = 0.15f * WINDOW_HEIGHT;
             float boxWidth = WINDOW_WIDTH - (2 * sides);
             float boxHeight = 0.75f * WINDOW_HEIGHT;
 
-            StockRow stock = gl.ex[selectedStock][gl.currentDate];
+            StockRow stock = gl.ex[selectedStock][gl.currentDate.Date];
 
             graphWidth = boxWidth * 0.5f;
             graphXStart = sides + graphWidth;
@@ -245,7 +254,7 @@ namespace StockSimulator
             decimal purchaseVal = 0M;
             foreach (var x in gl.wallet)
             {
-                newVal += (x.amount * gl.ex[x.symbol].Last().Value.close);
+                newVal += (x.amount * gl.ex[x.symbol][gl.currentDate.Date].close);
                 purchaseVal += (x.amount * x.purchasePrice);
             }
 
@@ -260,7 +269,7 @@ namespace StockSimulator
             }
             else
             {
-                percChange = (newVal / purchaseVal);
+                percChange = ((newVal -purchaseVal) / purchaseVal) * 100;
             }
 
             if (percChange > 0)
@@ -320,7 +329,6 @@ namespace StockSimulator
             spriteBatch.Draw(t, dateBox, Color.White);
 
             //Date text
-            string date = gl.currentDate.ToString("dd/MM/yyyy");
             Vector2 dateSize = f_120.MeasureString(date) * 0.2f;
             Vector2 dateStart = new Vector2(widthStart + ((size - dateSize.X) / 2f), heightStart + (size * 0.1f));
             Graphing.DrawString(spriteBatch, f_120, date, dateStart, Color.Black, 0.2f, 0);
@@ -339,6 +347,11 @@ namespace StockSimulator
 
             spriteBatch.Draw(tx, left, Color.Black);
             spriteBatch.Draw(tx, right, Color.Black);
+
+            Vector2 nextSize = f_30.MeasureString("Next Day");
+            Vector2 nextStart = new Vector2((widthStart + (size - nextSize.X) / 2), dateStart.Y + (dateSize.Y * 1.5f));
+            Graphing.DrawString(spriteBatch, f_30, "Next Day", nextStart, Color.DarkBlue, 1f, 0);
+            nextDay = new Rectangle((int)nextStart.X, (int)nextStart.Y, (int)nextSize.X, (int)nextSize.Y);
         }
 
         /// <summary>
@@ -395,22 +408,34 @@ namespace StockSimulator
             {
                 if(leftArrow.Contains(mouseState.Position))
                 {
-                    stockNumber = (stockNumber + 1) % stocks.Count();
+                    if (!input)
+                    {
+                        stockNumber = (stockNumber + 1) % stocks.Count();
+                    }
+                    input = true;
                 }
                 else if (rightArrow.Contains(mouseState.Position))
                 {
-                    stockNumber = (stockNumber - 1 + stocks.Count()) % stocks.Count();
+                    if (!input)
+                    {
+                        stockNumber = (stockNumber - 1 + stocks.Count()) % stocks.Count();
+                    }
+                    input = true;
                 }
                 else if(quantLeftArrow.Contains(mouseState.Position))
                 {
-                    if(quantity < 1)
+                    if (!input)
                     {
-                        quantity = 0;
+                        if (quantity < 1)
+                        {
+                            quantity = 0;
+                        }
+                        else
+                        {
+                            quantity -= 1;
+                        }
                     }
-                    else
-                    {
-                        quantity -= 1;
-                    }
+                    input = true;
                 }
                 else if(quantRightArrow.Contains(mouseState.Position))
                 {
@@ -418,14 +443,48 @@ namespace StockSimulator
                 }
                 else if(buyButton.Contains(mouseState.Position))
                 {
-                    gl.buyStock(gl.currentDate, selectedStock, quantity);
-                    quantity = 0;
+                    if (!input)
+                    {
+                        gl.buyStock(gl.currentDate, selectedStock, quantity);
+                        quantity = 0;
+                    }
+                    input = true;
                 }
                 else if(sellButton.Contains(mouseState.Position))
                 {
-                    gl.sellStock(gl.currentDate, selectedStock, quantity);
-                    quantity = 0;
+                    if (!input)
+                    {
+                        gl.sellStock(gl.currentDate, selectedStock, quantity);
+                        quantity = 0;
+                    }
+                    input = true;
                 }
+                else if(nextDay.Contains(mouseState.Position))
+                {
+                    if (!input)
+                    {
+                        gl.incrementTime();
+                        date = gl.currentDate.ToString("dd/MM/yyyy");
+                    }
+                    input = true;
+                    
+                }
+                else if(walletBox.Contains(mouseState.Position))
+                {
+                    if (!input)
+                    {
+                        ScreenManager.AddScreen(new WalletScreen(gl));
+                    }
+                    input = true;
+                }
+                else
+                {
+                    input = false;
+                }
+            }
+            else
+            {
+                input = false;
             }
 
             selectedStock = stocks[stockNumber];

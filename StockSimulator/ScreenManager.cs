@@ -8,6 +8,10 @@ using System.Linq;
 
 namespace StockSimulator
 {
+    /// <summary>
+    /// Class to manage the screens, load global content and manage which screen the user sees
+    /// ScreenManager and PlayScreen classes based on code of maigus96, DreamInCode: http://www.dreamincode.net/forums/topic/276045-simple-screen-management-in-xna/
+    /// </summary>
     public class ScreenManager : Game
     {
         public static GraphicsDeviceManager graphics;
