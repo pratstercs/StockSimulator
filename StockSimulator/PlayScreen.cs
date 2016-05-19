@@ -23,12 +23,15 @@ namespace StockSimulator
         Rectangle quantLeftArrow, quantRightArrow;
         Rectangle buyButton, sellButton;
         Rectangle nextDay;
+        Rectangle[] graphChangeButtons = new Rectangle[5];
 
         int stockNumber = 0;
         string[] stocks;
         string selectedStock;
         decimal price = 0M;
         string date = "";
+
+        string[] labels = { "1w", "2w", "1m", "6m", "1y" };
 
         int quantity = 0;
 
@@ -40,6 +43,8 @@ namespace StockSimulator
         bool input = false;
 
         DateTime start, end;
+
+        float labelWidth, labelHeight;
 
         LinkedList<KeyValuePair<string, string>> ticker = new LinkedList<KeyValuePair<string, string>>();
 
@@ -87,6 +92,9 @@ namespace StockSimulator
 
             date = gl.currentDate.ToString("dd/MM/yyyy");
 
+            labelWidth = labels.Max(x => (f_30.MeasureString(x).X / 3f));
+            labelHeight = labels.Max(x => (f_30.MeasureString(x).Y / 3f));
+
             base.LoadAssets();
         }
 
@@ -103,10 +111,32 @@ namespace StockSimulator
             DrawTicker();
             drawPlayBox();
             DrawGraph(graphWeeks);
+            DrawGraphChangeButtons();
 
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void DrawGraphChangeButtons()
+        {
+            float startHeight = graphYStart - labelHeight;
+            float startWidth = graphXStart + graphWidth - labelWidth;
+
+            Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
+            t.SetData(new Color[] { Color.White });
+
+            for(int i = 4; i >= 0; i--)
+            {
+                Vector2 startPos = new Vector2(startWidth, startHeight);
+                graphChangeButtons[i] = new Rectangle((int)startPos.X, (int)startPos.Y, (int)labelWidth, (int)labelHeight);
+
+                spriteBatch.Draw(t, graphChangeButtons[i], Color.White);
+
+                Graphing.DrawString(spriteBatch, f_30, labels[i], startPos, Color.Red, (1f / 3f), 0);
+                startWidth -= labelWidth * 1.2f;
+            }
+            //Graphing.DrawString(spriteBatch, f_30, "1w", new Vector2(startWidth, startHeight), Color.Red, (1f / 3f), 0);
         }
 
         /// <summary>
@@ -475,6 +505,46 @@ namespace StockSimulator
                     if (!input)
                     {
                         ScreenManager.AddScreen(new WalletScreen(gl));
+                    }
+                    input = true;
+                }
+                else if(graphChangeButtons[0].Contains(mouseState.Position))
+                {
+                    if (!input)
+                    {
+                        graphWeeks = 1;
+                    }
+                    input = true;
+                }
+                else if (graphChangeButtons[1].Contains(mouseState.Position))
+                {
+                    if (!input)
+                    {
+                        graphWeeks = 2;
+                    }
+                    input = true;
+                }
+                else if (graphChangeButtons[2].Contains(mouseState.Position))
+                {
+                    if (!input)
+                    {
+                        graphWeeks = 4;
+                    }
+                    input = true;
+                }
+                else if (graphChangeButtons[3].Contains(mouseState.Position))
+                {
+                    if (!input)
+                    {
+                        graphWeeks = 26;
+                    }
+                    input = true;
+                }
+                else if (graphChangeButtons[4].Contains(mouseState.Position))
+                {
+                    if (!input)
+                    {
+                        graphWeeks = 52;
                     }
                     input = true;
                 }
