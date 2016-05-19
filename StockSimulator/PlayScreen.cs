@@ -416,11 +416,19 @@ namespace StockSimulator
             Graphing.drawLine(t, spriteBatch, Color.Black, new Vector2(0, WINDOW_HEIGHT * 0.08f), new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT * 0.08f), 35);
 
             gl.getAllChanges();
-            float offset = 0;
+
             float FIXED_WIDTH = f_120.MeasureString("AAPL: ▲ -999.99").X * 0.17f;
-            foreach (StockChange sc in gl.changes.Values)
+            int number = (int)Math.Floor(WINDOW_WIDTH / FIXED_WIDTH);
+            float offset = -FIXED_WIDTH;
+
+            StockChange[] changeList = new StockChange[number];
+            StockChange[] changes = (from entry in gl.changes select entry.Value).ToArray(); //linq-y goodness
+
+            for (int i = 0; i < number; i++)
             {
-                Graphing.DrawTickerString(spriteBatch, f_120, new string[] { sc.symbol, sc.change.ToString() }, new Vector2(WINDOW_WIDTH - (tickerScroll + offset), WINDOW_HEIGHT * 0.085f));
+                changeList[i] = changes[(i % changes.Count())];
+                float xPos = WINDOW_WIDTH - (tickerScroll + offset) % WINDOW_WIDTH;
+                Graphing.DrawTickerString(spriteBatch, f_120, new string[] { changeList[i].symbol, changeList[i].change.ToString() }, new Vector2(xPos, WINDOW_HEIGHT * 0.085f));
                 offset += FIXED_WIDTH;
             }
         }
