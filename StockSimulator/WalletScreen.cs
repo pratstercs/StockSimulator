@@ -17,8 +17,6 @@ namespace StockSimulator
         public static int WINDOW_HEIGHT = ScreenManager.WINDOW_HEIGHT;
         public static int WINDOW_WIDTH = ScreenManager.WINDOW_WIDTH;
 
-        string fullWidth;
-
         float dateCol, nameCol, priceCol, amtCol, valCol;
         float dateStart, nameStart, priceStart, amtStart, valStart;
         float textHeight;
