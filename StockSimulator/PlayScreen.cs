@@ -11,12 +11,29 @@ namespace StockSimulator
     {
         SpriteBatch spriteBatch = ScreenManager.spriteBatch;
         SpriteFont f_120 = ScreenManager.f_120;
+        SpriteFont f_30 = ScreenManager.f_30;
         GraphicsDevice GraphicsDevice = ScreenManager.graphicsDevice;
         MouseState mouseState;
+        MouseState oldMouseState;
 
         GameLogic gl;
 
         Rectangle walletBox;
+        Rectangle leftArrow, rightArrow;
+        Rectangle quantLeftArrow, quantRightArrow;
+        Rectangle buyButton, sellButton;
+
+        int stockNumber = 0;
+        string[] stocks;
+        string selectedStock;
+        decimal price = 0M;
+
+        int quantity = 0;
+
+        float graphXStart = 0;
+        float graphYStart = 0;
+        float graphHeight = 0;
+        float graphWidth = 0;
 
         DateTime now;
         DateTime old;
@@ -28,6 +45,15 @@ namespace StockSimulator
 
         float tickerScroll = 0;
 
+        public PlayScreen()
+        {
+        }
+
+        public PlayScreen(GameLogic g)
+        {
+            gl = g;
+        }
+
         /// <summary>
         /// Load what is required for PlayScreen
         /// Sets background color and configures the GameLogic object with the stock data required
@@ -36,14 +62,24 @@ namespace StockSimulator
         {
             BackgroundColor = Color.LightGray;
 
-            now = new DateTime(2016, 6, 1);
-            old = new DateTime(2016, 5, 1);
+            now = new DateTime(2016, 6, 2);
+            old = new DateTime(2016, 5, 2);
             //old = now.AddYears(-1);
 
             gl = new GameLogic(old, 100000M);
 
             gl.getData("C", old.ToString("yyyyMMdd"), now.ToString("yyyyMMdd"));
             gl.getData("JPM", old.ToString("yyyyMMdd"), now.ToString("yyyyMMdd"));
+
+            var symbols = from entry in gl.ex.Keys orderby entry ascending select entry;
+            stocks = new string[symbols.Count()];
+            int i = 0;
+            foreach(string x in symbols)
+            {
+                stocks[i] = x;
+                i++;
+            }
+            selectedStock = stocks[stockNumber];
 
             base.LoadAssets();
         }
@@ -59,11 +95,129 @@ namespace StockSimulator
             drawWalletBox();
             drawDateBox();
             DrawTicker();
+            drawPlayBox(gameTime);
             DrawGraph();
 
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void drawPlayBox(GameTime gameTime)
+        {
+            float sides = WINDOW_HEIGHT * (0.25f * 1.25f);
+            float height = 0.15f * WINDOW_HEIGHT;
+            float boxWidth = WINDOW_WIDTH - (2 * sides);
+            float boxHeight = 0.75f * WINDOW_HEIGHT;
+
+            StockRow stock = gl.ex[selectedStock][gl.currentDate];
+
+            graphWidth = boxWidth * 0.5f;
+            graphXStart = sides + graphWidth;
+
+            //Background
+            Color col = Color.Cornsilk;
+            Rectangle box = new Rectangle((int)sides, (int)height, (int)boxWidth, (int)boxHeight);
+            Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
+            t.SetData<Color>(new Color[] { col });
+            spriteBatch.Draw(t, box, col);
+
+            float titleHeight = f_120.MeasureString("A").Y / 2f;
+            graphYStart = height + titleHeight;
+            graphHeight = boxHeight - titleHeight;
+
+            string name = gl.getName(selectedStock);
+            Graphing.DrawString(spriteBatch, f_120, name, new Vector2(sides, height), Color.Black, 0.5f, 0);
+
+            //left 2/3 text etc
+            Vector2 searchTextSize = f_30.MeasureString("Symbol: ");
+            Vector2 searchTextStart = new Vector2(sides, height + titleHeight);
+            Graphing.DrawString(spriteBatch, f_30, "Symbol: ", searchTextStart, Color.Black, 1f, 0);
+
+            Vector2 searchBoxSize = f_30.MeasureString("AAAAA");
+            Vector2 arrowSize = f_30.MeasureString("▶");
+            Vector2 arrowStart = new Vector2(searchTextStart.X + searchTextSize.X, searchTextStart.Y);
+            Vector2 rightArrowStart = new Vector2(arrowStart.X + arrowSize.X + searchTextSize.X, arrowStart.Y);
+            leftArrow = new Rectangle((int)arrowStart.X, (int)arrowStart.Y, (int)arrowSize.X, (int)arrowSize.Y);
+            rightArrow = new Rectangle((int)rightArrowStart.X, (int)rightArrowStart.Y, (int)arrowSize.X, (int)arrowSize.Y);
+            Rectangle stockBox = new Rectangle((int)(arrowStart.X + arrowSize.X), (int)arrowStart.Y, (int)searchBoxSize.X, (int)searchBoxSize.Y);
+
+            t.SetData(new Color[] { Color.White });
+            spriteBatch.Draw(t, stockBox, Color.White);
+
+            float symbolWidth = f_30.MeasureString(selectedStock).X;
+            Vector2 symbolStart = new Vector2(arrowStart.X + arrowSize.X + (searchBoxSize.X - symbolWidth) / 2, arrowStart.Y);
+            Graphing.DrawString(spriteBatch, f_30, "<", arrowStart, Color.Black, 1f, 0);
+            Graphing.DrawString(spriteBatch, f_30, ">", rightArrowStart, Color.Black, 1f, 0);
+
+            Graphing.DrawString(spriteBatch, f_30, selectedStock, symbolStart, Color.Black, 1f, 0);
+
+            //High/Low/Open/Close
+            string high = "High: $" + stock.high.ToString("N2");
+            string low = "Low: $" + stock.low.ToString("N2");
+            string open = "Open: $" + stock.open.ToString("N2");
+            string close = "Close: $" + stock.close.ToString("N2");
+
+            Vector2 highStart = searchTextStart;
+            highStart.Y += searchTextSize.Y * 1.35f;
+            Graphing.DrawString(spriteBatch, f_30, high, highStart, Color.Black, 1f, 0);
+            highStart.Y += searchTextSize.Y * 1.35f;
+            Graphing.DrawString(spriteBatch, f_30, low, highStart, Color.Black, 1f, 0);
+            highStart.Y += searchTextSize.Y * 1.35f;
+            Graphing.DrawString(spriteBatch, f_30, open, highStart, Color.Black, 1f, 0);
+            highStart.Y += searchTextSize.Y * 1.35f;
+            Graphing.DrawString(spriteBatch, f_30, close, highStart, Color.Black, 1f, 0);
+            highStart.Y += searchTextSize.Y * 1.35f;
+
+            //Quantity
+            Vector2 quantityTextSize = f_30.MeasureString("Quantity: ");
+            Graphing.DrawString(spriteBatch, f_30, "Quantity: ", highStart, Color.Black, 1f, 0);
+
+            Vector2 QLarrowStart = new Vector2(highStart.X + quantityTextSize.X, highStart.Y);
+            Vector2 QRarrowStart = new Vector2(QLarrowStart.X + arrowSize.X + quantityTextSize.X, highStart.Y);
+            quantLeftArrow = new Rectangle((int)QLarrowStart.X, (int)QLarrowStart.Y, (int)arrowSize.X, (int)arrowSize.Y);
+            quantRightArrow = new Rectangle((int)QRarrowStart.X, (int)QRarrowStart.Y, (int)arrowSize.X, (int)arrowSize.Y);
+            Graphing.DrawString(spriteBatch, f_30, "<", QLarrowStart, Color.Black, 1f, 0);
+            Graphing.DrawString(spriteBatch, f_30, ">", QRarrowStart, Color.Black, 1f, 0);
+
+            Rectangle quantBox = new Rectangle((int)(QLarrowStart.X + arrowSize.X), (int)QLarrowStart.Y, (int)searchBoxSize.X, (int)searchBoxSize.Y);
+            spriteBatch.Draw(t, quantBox, Color.White);
+
+            Vector2 quantitySize = f_30.MeasureString(quantity.ToString());
+            Vector2 quantityStart = new Vector2(quantBox.Left + ((quantBox.Width - quantitySize.X) / 2), quantBox.Top);
+            Graphing.DrawString(spriteBatch, f_30, quantity.ToString(), quantityStart, Color.Black, 1f, 0);
+
+            highStart.Y += searchTextSize.Y * 1.25f;
+
+            decimal cost = quantity * stock.close;
+            string costStr = "Total: $" + cost.ToString("N2");
+            Graphing.DrawString(spriteBatch, f_30, costStr, highStart, Color.Black, 1f, 0);
+
+            //Buy/Sell Buttons
+            highStart.Y += searchTextSize.Y * 1.25f;
+
+            Vector2 buttonAreaStart = new Vector2(highStart.X, highStart.Y);
+            float buttonSpacing = boxWidth / 14f;
+            float buttonWidth = buttonSpacing * 2f;
+            float buttonHeight = searchTextSize.Y;
+
+            Vector2 buyButtonStart = new Vector2(buttonAreaStart.X + buttonSpacing, buttonAreaStart.Y);
+            Vector2 sellButtonStart = new Vector2((buttonAreaStart.X + buttonWidth + (2 * buttonSpacing)), buttonAreaStart.Y);
+
+            float buyOffset = (buttonWidth - f_30.MeasureString("Buy").X) /2f;
+            float sellOffset = (buttonWidth - f_30.MeasureString("Sell").X) /2f;
+
+            Vector2 buyTextStart = new Vector2(buttonAreaStart.X + buttonSpacing + buyOffset, buttonAreaStart.Y);
+            Vector2 sellTextStart = new Vector2((buttonAreaStart.X + buttonWidth + (2 * buttonSpacing)) + sellOffset, buttonAreaStart.Y);
+
+            buyButton = new Rectangle((int)buyButtonStart.X, (int)buyButtonStart.Y, (int)buttonWidth, (int)buttonHeight); //x y width height
+            sellButton = new Rectangle((int)sellButtonStart.X, (int)sellButtonStart.Y, (int)buttonWidth, (int)buttonHeight);
+
+            spriteBatch.Draw(t, buyButton, Color.White);
+            spriteBatch.Draw(t, sellButton, Color.White);
+
+            Graphing.DrawString(spriteBatch, f_30, "Buy", buyTextStart, Color.Black, 1f, 0);
+            Graphing.DrawString(spriteBatch, f_30, "Sell", sellTextStart, Color.Black, 1f, 0);
         }
 
         /// <summary>
@@ -106,7 +260,7 @@ namespace StockSimulator
             }
             else
             {
-                percChange = (newVal / purchaseVal) * 100;
+                percChange = (newVal / purchaseVal);
             }
 
             if (percChange > 0)
@@ -212,12 +366,12 @@ namespace StockSimulator
         /// </summary>
         private void DrawGraph()
         {
-            DateTime[] dates = gl.getStockDates("JPM", old, now);
+            DateTime[] dates = gl.getStockDates(selectedStock, old, now);
 
-            decimal[][] data = gl.getStockDataByDay("JPM", old, now);
+            decimal[][] data = gl.getStockDataByDay(selectedStock, old, now);
             Color[] colours = { Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
             Texture2D t = new Texture2D(GraphicsDevice, 1, 1);
-            float[] values = Graphing.initialiseGraph(spriteBatch, t, f_120, data, dates, WINDOW_HEIGHT * 0.5f, WINDOW_WIDTH * 0.5f, WINDOW_WIDTH * 0.25f, WINDOW_HEIGHT * 0.25f); //draw basics of graph and calculate actual plot area excluding margins, etc
+            float[] values = Graphing.initialiseGraph(spriteBatch, t, f_120, data, dates, graphHeight, graphWidth, graphXStart, graphYStart); //draw basics of graph and calculate actual plot area excluding margins, etc
 
             for (int i = 0; i < 4; i++)
             {
@@ -234,6 +388,48 @@ namespace StockSimulator
         public override void Update(GameTime gameTime)
         {
             tickerScroll = (tickerScroll + 1) % WINDOW_WIDTH;
+
+            mouseState = Mouse.GetState();
+
+            if (mouseState.LeftButton == ButtonState.Pressed && oldMouseState.LeftButton == ButtonState.Released) //check if mouse is pressed and is inside a button
+            {
+                if(leftArrow.Contains(mouseState.Position))
+                {
+                    stockNumber = (stockNumber + 1) % stocks.Count();
+                }
+                else if (rightArrow.Contains(mouseState.Position))
+                {
+                    stockNumber = (stockNumber - 1 + stocks.Count()) % stocks.Count();
+                }
+                else if(quantLeftArrow.Contains(mouseState.Position))
+                {
+                    if(quantity < 1)
+                    {
+                        quantity = 0;
+                    }
+                    else
+                    {
+                        quantity -= 1;
+                    }
+                }
+                else if(quantRightArrow.Contains(mouseState.Position))
+                {
+                    quantity += 1;
+                }
+                else if(buyButton.Contains(mouseState.Position))
+                {
+                    gl.buyStock(gl.currentDate, selectedStock, quantity);
+                    quantity = 0;
+                }
+                else if(sellButton.Contains(mouseState.Position))
+                {
+                    gl.sellStock(gl.currentDate, selectedStock, quantity);
+                    quantity = 0;
+                }
+            }
+
+            selectedStock = stocks[stockNumber];
+            price = gl.getValues(selectedStock, now).close;
 
             base.Update(gameTime);
         }
