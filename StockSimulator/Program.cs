@@ -16,7 +16,7 @@ namespace StockSimulator
         [STAThread]
         static void Main()
         {
-            using (var game = new MonoGame())
+            using (var game = new ScreenManager())
                 game.Run();
         }
     }
@@ -38,7 +38,7 @@ namespace StockSimulator
             Exchange ex = new Exchange();
             string response = WebInterface.queryAPI("JPM");
             Utilities.arrayify("JPM", response, ex);
-            FileInterface.writeExchangeToFile(path, ex);
+            FileInterface.writeExchangeToFile(path, gl);
         }
 
         public void testTicker()
