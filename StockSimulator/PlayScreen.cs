@@ -54,6 +54,9 @@ namespace StockSimulator
         float tickerScroll = 0;
         int graphWeeks = 52;
 
+        bool messageDisplayed = false;
+        int timeElapsed = 0;
+
         public PlayScreen()
         {
         }
@@ -112,12 +115,30 @@ namespace StockSimulator
             drawPlayBox();
             DrawGraph(graphWeeks);
             DrawGraphChangeButtons();
+            DrawNotification();
 
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
+        /// <summary>
+        /// Method to draw a notification if a transaction fails
+        /// </summary>
+        private void DrawNotification()
+        {
+            if(messageDisplayed)
+            {
+                string str = "Transaction Failed";
+                Vector2 textSize = f_30.MeasureString(str);
+                Vector2 textStart = new Vector2(((WINDOW_WIDTH - textSize.X) / 2), WINDOW_HEIGHT - textSize.Y);
+                Graphing.DrawString(spriteBatch, f_30, str, textStart, Color.Red, 1f, 0);
+            }
+        }
+
+        /// <summary>
+        /// Method to draw buttons to change the graph scale
+        /// </summary>
         private void DrawGraphChangeButtons()
         {
             float startHeight = graphYStart - labelHeight;
@@ -435,6 +456,15 @@ namespace StockSimulator
 
             mouseState = Mouse.GetState();
 
+            if(messageDisplayed == true)
+            {
+                if (gameTime.TotalGameTime.Seconds - timeElapsed > 3)
+                {
+                    messageDisplayed = false;
+                    timeElapsed = 0;
+                }
+            }
+
             if (mouseState.LeftButton == ButtonState.Pressed && oldMouseState.LeftButton == ButtonState.Released) //check if mouse is pressed and is inside a button
             {
                 if(leftArrow.Contains(mouseState.Position))
@@ -476,8 +506,15 @@ namespace StockSimulator
                 {
                     if (!input)
                     {
-                        gl.buyStock(gl.currentDate, selectedStock, quantity);
-                        quantity = 0;
+                        if(gl.buyStock(gl.currentDate, selectedStock, quantity))
+                        {
+                            quantity = 0;
+                        }
+                        else
+                        {
+                            messageDisplayed = true;
+                            timeElapsed = gameTime.TotalGameTime.Seconds;
+                        }
                     }
                     input = true;
                 }
@@ -485,7 +522,15 @@ namespace StockSimulator
                 {
                     if (!input)
                     {
-                        gl.sellStock(gl.currentDate, selectedStock, quantity);
+                        if (gl.sellStock(gl.currentDate, selectedStock, quantity))
+                        {
+                            quantity = 0;
+                        }
+                        else
+                        {
+                            messageDisplayed = true;
+                            timeElapsed = gameTime.TotalGameTime.Seconds;
+                        }
                         quantity = 0;
                     }
                     input = true;
