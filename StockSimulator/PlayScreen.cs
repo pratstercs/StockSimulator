@@ -59,6 +59,14 @@ namespace StockSimulator
 
         public PlayScreen()
         {
+            start = new DateTime(2014, 5, 5);
+            DateTime dateToStart = new DateTime(2015, 5, 5);
+            end = new DateTime(2016, 5, 2);
+
+            gl = new GameLogic(dateToStart, 100000M);
+
+            gl.getData("C", start.ToString("yyyyMMdd"), end.ToString("yyyyMMdd"));
+            gl.getData("JPM", start.ToString("yyyyMMdd"), end.ToString("yyyyMMdd"));
         }
 
         public PlayScreen(GameLogic g)
@@ -73,15 +81,6 @@ namespace StockSimulator
         public override void LoadAssets()
         {
             BackgroundColor = Color.LightGray;
-
-            start = new DateTime(2014, 5, 5);
-            DateTime dateToStart = new DateTime(2015, 5, 5);
-            end = new DateTime(2016, 5, 2);
-
-            gl = new GameLogic(dateToStart, 100000M);
-
-            gl.getData("C", start.ToString("yyyyMMdd"), end.ToString("yyyyMMdd"));
-            gl.getData("JPM", start.ToString("yyyyMMdd"), end.ToString("yyyyMMdd"));
 
             var symbols = from entry in gl.ex.Keys orderby entry ascending select entry;
             stocks = new string[symbols.Count()];
@@ -187,7 +186,13 @@ namespace StockSimulator
             graphHeight = boxHeight - titleHeight;
 
             string name = gl.getName(selectedStock);
-            Graphing.DrawString(spriteBatch, f_120, name, new Vector2(sides, height), Color.Black, 0.5f, 0);
+            float titleWidth = f_120.MeasureString(name).X / 2f;
+            float titleScale = 0.5f;
+            if(titleWidth > boxWidth)
+            {
+                titleScale = boxWidth / titleWidth * 0.5f;
+            }
+            Graphing.DrawString(spriteBatch, f_120, name, new Vector2(sides, height), Color.Black, titleScale, 0);
 
             //left 2/3 text etc
             Vector2 searchTextSize = f_30.MeasureString("Symbol: ");

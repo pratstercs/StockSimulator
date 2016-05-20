@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace StockSimulator
 {
@@ -89,13 +90,16 @@ namespace StockSimulator
 
         private void startCampaign1()
         {
-            System.DateTime date = System.DateTime.Now.Date.AddYears(-1);
-            GameLogic gl = new GameLogic(date, 100000M);
+            DateTime start = new DateTime(2014, 5, 5);
+            DateTime dateToStart = new DateTime(2015, 5, 5);
+            DateTime end = new DateTime(2016, 5, 2);
 
-            string[] symbols = { "JPM", "C", "AXP" };
+            GameLogic gl = new GameLogic(dateToStart, 100000M);
+
+            string[] symbols = { "JPM", "C", "AXP", "USB", "BAC", "WFC", "BK", "PNC" };
             foreach(string s in symbols)
             {
-                gl.getData(s, date.ToString("yyyyMMdd"), date.AddYears(1).ToString("yyyyMMdd"));
+                gl.getData(s, start.ToString("yyyyMMdd"), end.ToString("yyyyMMdd"));
             }
 
             ScreenManager.AddScreen(new PlayScreen(gl));
@@ -137,9 +141,8 @@ namespace StockSimulator
         /// </summary>
         private void DrawButton()
         {
-            Color[] colours = { Color.DarkGray, Color.Maroon };
+            Color[] colours = { Color.Maroon, Color.Maroon, Color.DarkGray, Color.Maroon };
             int j = 0;
-
             foreach (Rectangle rectangle in buttons)
             {
                 Color[] data = new Color[rectangle.Width * rectangle.Height];
@@ -177,20 +180,6 @@ namespace StockSimulator
 
                 start += buttonWidth * 1.25f;
             }
-        }
-
-        private void loadingString()
-        {
-            string str = "Loading...";
-            Vector2 size = f_120.MeasureString(str);
-            Vector2 start = new Vector2((WINDOW_WIDTH - size.X) / 2, (WINDOW_HEIGHT - size.Y) / 2);
-
-            Graphing.DrawString(spriteBatch, f_120, str, start, Color.Black, 1f, 0);
-        }
-
-        private void OpenFile()
-        {
-            //nothing yet
         }
     }
 }
