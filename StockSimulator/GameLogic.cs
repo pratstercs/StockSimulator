@@ -367,7 +367,11 @@ namespace StockSimulator
             int end;
 
             end = source.IndexOf(symbol, 0);
-            return source.Substring(0, end);
+            string name = source.Substring(0, end);
+
+            name = name.Replace("&amp;", "&");
+
+            return name;
         }
 
         /// <summary>
