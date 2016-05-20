@@ -368,14 +368,43 @@ namespace StockSimulator
 
             sb.Draw(t, bg, Color.White);
 
-            drawMainMargins(sb, t, height, width, Xstart, Ystart);
-            drawMinorMargins(sb, t, graphHeight, graphWidth, Xstart + maxLeftWidth, Ystart);
             drawGridlines(sb, t, graphHeight, Xstart + maxLeftWidth, Ystart, Xstart + width);
+            drawMinorMargins(sb, t, graphHeight, graphWidth, Xstart + maxLeftWidth, Ystart);
+            drawMainMargins(sb, t, height, width, Xstart, Ystart);
 
             drawLeftAxisLabels(sb, font, labels[0], graphHeight, Xstart, height - maxBottomHeight + Ystart);
             drawBottomAxisLabels(sb, font, labels[1], graphWidth, height + Ystart, (Xstart + maxLeftWidth));
 
+            drawAxisLegend(sb, t, font, Xstart, Ystart);
+
             return toReturn;
+        }
+
+        /// <summary>
+        /// Method to draw the legend just above the top-left corner of the graph
+        /// </summary>
+        /// <param name="sb">The SpriteBatch to use</param>
+        /// <param name="t">The Texture2D object to use to draw the lines</param>
+        /// <param name="font">The predefined font to use</param>
+        /// <param name="Xstart">The x co-ordinate to start from</param>
+        /// <param name="Ystart">The y co-ordinate to start from</param>
+        private static void drawAxisLegend(SpriteBatch sb, Texture2D t, SpriteFont font, float Xstart, float Ystart)
+        {
+            float textHeight = font.MeasureString("1").Y / 12f;
+            Color[] colours = { Color.Black, Color.PeachPuff, Color.Navy, Color.Green, Color.MonoGameOrange };
+            string[] labels = { "Legend: ", "Open ", "Close ", "High ", "Low " };
+
+            Vector2 start = new Vector2(Xstart, Ystart - textHeight);
+            float totalWidth = labels.Sum(x => (font.MeasureString(x).X / 12f));
+            Rectangle bg = new Rectangle((int)start.X, (int)start.Y, (int)totalWidth, (int)textHeight);
+            sb.Draw(t, bg, Color.White);
+
+            for (int i = 0; i < 5; i++)
+            {
+                DrawString(sb, font, labels[i], start, colours[i], (1f / 12f), 0);
+
+                start.X += font.MeasureString(labels[i]).X / 12f;
+            }
         }
 
         /// <summary>
@@ -457,7 +486,8 @@ namespace StockSimulator
 
             for (int i = 0; i < 11; i++)
             {
-                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart, (Ystart - (spacing * i))), Color.Black, 0.1f, 0);
+                float size = font.MeasureString(labels[i]).Y / 20f;
+                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart, (Ystart - (spacing * i)) - size), Color.Black, 0.1f, 0);
             }
         }
 
@@ -476,8 +506,10 @@ namespace StockSimulator
 
             for (int i = 0; i < 11; i++)
             {
-                float center = font.MeasureString(labels[i]).X / (2 * 10f);
-                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart + (spacing * i) - center, height), Color.Black, 0.1f, -45);
+                Vector2 size = font.MeasureString(labels[i]);
+                float center = size.X / (2 * 10f);
+                float Ystart = height - (size.Y / 10f);
+                MonoGame.DrawString(sb, font, labels[i], new Vector2(Xstart + (spacing * i) - center, Ystart), Color.Black, 0.1f, -45);
             }
         }
 

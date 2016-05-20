@@ -71,8 +71,7 @@ namespace StockSimulator
                             startCampaign1();
                             break;
                         case 1: //sandbox
-                            //loadingString();
-                            ScreenManager.AddScreen(new PlayScreen());
+                            startSandbox();
                             break;
                         case 2: //load game
                             ScreenManager.RemoveScreen(this);
@@ -98,6 +97,23 @@ namespace StockSimulator
 
             string[] symbols = { "JPM", "C", "AXP", "USB", "BAC", "WFC", "BK", "PNC" };
             foreach(string s in symbols)
+            {
+                gl.getData(s, start.ToString("yyyyMMdd"), end.ToString("yyyyMMdd"));
+            }
+
+            ScreenManager.AddScreen(new PlayScreen(gl));
+        }
+
+        private void startSandbox()
+        {
+            DateTime start = new DateTime(2014, 5, 5);
+            DateTime dateToStart = new DateTime(2015, 5, 5);
+            DateTime end = new DateTime(2016, 5, 2);
+
+            GameLogic gl = new GameLogic(dateToStart, 100000M);
+
+            string[] symbols = { "AAPL", "GOOG", "TSLA", "NFLX", "AMD", "NVDA" };
+            foreach (string s in symbols)
             {
                 gl.getData(s, start.ToString("yyyyMMdd"), end.ToString("yyyyMMdd"));
             }
